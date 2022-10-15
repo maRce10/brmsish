@@ -4,7 +4,7 @@ Title: Random Stuff on brms Bayesian Models
 Version: 1.0.2
 Date: 2022-10-14
 Maintainer: Marcelo Araya-Salas <marcelo.araya@ucr.ac.cr>
-Description: A poorly documented package with random, tangentially related functions to do visualize or modify brms models.
+Description: A poorly documented package with random, tangentially related functions to visualize or somehow manipulate brms models.
 License: GPL (>= 2)
 Imports: kableExtra, pbapply, brms (>= 2.18.0), HDInterval, ape, cowplot, ggdist, posterior, ggplot2, methods
 Depends: R (>= 3.5.0)

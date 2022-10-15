@@ -5,7 +5,7 @@
 \alias{brmsish}
 \title{brmsish: random stuff on brms bayesian models}
 \description{
-A poorly documented package with random, tangentially related functions to do visualize or modify brms models.
+A poorly documented package with random, tangentially related functions to visualize or somehow manipulate brms models.
 }
 \details{
 The main features of the package are:

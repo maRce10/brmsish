@@ -34,7 +34,7 @@ remotes::install_github("maRce10/brmsish")
 library(brmsish)
 ```
 
-Use it under your own rish. But if you do, please cite
+Use it under your own risk. But if you do, please cite
 [brmsish](https://marce10.github.io/brmsish/) as follows:
 
 Araya-Salas (2022), *brmsish: random stuff on brms bayesian models*. R

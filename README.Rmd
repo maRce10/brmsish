@@ -39,7 +39,7 @@ library(brmsish)
 
 ```
 
-Use it under your own rish. But if you do, please cite [brmsish](https://marce10.github.io/brmsish/) as follows:
+Use it under your own risk. But if you do, please cite [brmsish](https://marce10.github.io/brmsish/) as follows:
 
 Araya-Salas (2022), *brmsish: random stuff on brms bayesian models*. R package version 1.0.0. 
 
