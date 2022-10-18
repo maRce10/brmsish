@@ -1,6 +1,6 @@
 #' brmsish: random stuff on brms bayesian models
 #'
-#' A poorly documented package with random, tangentially related functions to visualize or somehow manipulate brms models.
+#' A poorly documented package with a few random, tangentially related functions to visualize or somehow manipulate brms models.
 
 #'
 #' The main features of the package are:

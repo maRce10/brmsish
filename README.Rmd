@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 ```
 
 
-A poorly documented package with random, tangentially related functions to do visualize or modify [brms](https://paul-buerkner.github.io/brms/index.html) models.
+A poorly documented package with a few random, tangentially related functions to visualize or modify [brms](https://paul-buerkner.github.io/brms/index.html) models.
 
 <!-- Unlike other packages for setting up research compendiums, `brmsish` has very simple functionality. Hence, users can focus on the research project itself rather than on learning how to use a new R package. -->
 

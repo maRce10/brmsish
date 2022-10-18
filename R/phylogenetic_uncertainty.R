@@ -1,4 +1,4 @@
-brms_phylo_uncertainty <- function(phylos, data, formula, parallel, iter = 5000, model.name, thin = 0, save.model = FALSE, single.model = FALSE, path = "./", ...){
+phylogenetic_uncertainty <- function(phylos, data, formula, parallel, iter = 5000, model.name, thin = 0, save.model = FALSE, single.model = FALSE, path = "./", ...){
 
   As <- lapply(phylos, ape::vcv.phylo)
 
