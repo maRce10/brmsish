@@ -12,7 +12,6 @@
 #' @import brms
 #' @import pbapply
 #' @import kableExtra
-#' @import HDInterval
 #' @import ape
 #' @import cowplot
 #' @import ggdist

@@ -29,7 +29,7 @@ contrasts <-
 
     # fix  baseline level
     original_levels <-
-      gsub(" ", "", paste0(predictor, unique(model$data[, predictor])))
+      gsub(" |&", "", paste0(predictor, unique(model$data[, predictor])))
     base_level <- setdiff(original_levels, model_levels)
 
     # get levels
@@ -37,7 +37,7 @@ contrasts <-
 
     # sort
     if (!is.null(sort.levels))
-    pred_levels <- pred_levels[match(sort.levels, pred_levels)]
+      pred_levels <- pred_levels[match(sort.levels, pred_levels)]
 
     # add predictor name
     pred_levels <- paste0(predictor, pred_levels)
@@ -45,17 +45,21 @@ contrasts <-
     # create data frame with level pairs
     levels_df <- as.data.frame(t(utils::combn(pred_levels, 2)))
 
-    contrsts <- paste(apply(levels_df, 1, paste, collapse = " - "), "= 0")
+    # remove spaces and &
+    levels_df$V1.nospace <- gsub(" |&", "", levels_df$V1)
+    levels_df$V2.nospace <- gsub(" |&", "", levels_df$V2)
+
+    # create contrasts in brms syntax
+    contrsts <- paste(apply(levels_df[, c("V1.nospace", "V2.nospace")], 1, paste, collapse = " - "), "= 0")
 
    # convert magnitude for those compare against baseline
     levels_df$sign <- 1
     levels_df$sign[grep(base_level, levels_df$V1)] <- -1
 
     names(contrsts) <- paste0(levels_df$V1, level.sep, levels_df$V2)
-    contrsts <- gsub(paste0(base_level, level.sep), "", contrsts)
-    contrsts <- gsub(paste0(level.sep, base_level), "", contrsts)
+    contrsts <- gsub(paste0(base_level, " - "), "", contrsts)
+    contrsts <- gsub(paste0(" - ", base_level), "", contrsts)
     names(contrsts) <- gsub(predictor, "", names(contrsts))
-
 
     levels_df$hypothesis <- names(contrsts)
 
@@ -131,10 +135,6 @@ contrasts <-
     merged_xdrws <- posterior::merge_chains(xdrws)
     sub_posts <- as.data.frame(merged_xdrws)[, names(contrsts)]
     names(sub_posts) <- names(contrsts)
-
-    hdis <-
-      t(sapply(names(contrsts), function(y)
-        HDInterval::hdi(sub_posts[, colnames(sub_posts) == y])))
 
     hyp_table$CI_low <- round(hyp_table$CI.Lower, digits = 3)
     hyp_table$CI_high <- round(hyp_table$CI.Upper, digits = 3)

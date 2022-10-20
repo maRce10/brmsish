@@ -58,10 +58,7 @@ html_summary <-
     sub_posts <- as.data.frame(merged_xdrws)
     names(sub_posts) <- betas
 
-    hdis <-
-      t(sapply(betas, function(y)
-        HDInterval::hdi(sub_posts[, colnames(sub_posts) == y])))
-    coef_table <- data.frame(summ, hdis)
+    coef_table <- data.frame(summ)
     coef_table <-
       coef_table[, c("Estimate", "Rhat", "Bulk_ESS", "l.95..CI", "u.95..CI")]
 

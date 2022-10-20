@@ -1,4 +1,4 @@
-# takes several brms models stored as RDS files and combine them in a single model. By default the combined model is saved as a RDS file, but it can instead be return as an object (if \code{save = FALSE}).
+# takes several brms models stored as RDS files and combine them in a single model. By default the combined model is saved as a RDS file, but it can instead be returned as an object (if \code{save = FALSE}).
 
 combine_model_rds <-
   function(path,

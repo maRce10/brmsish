@@ -6,7 +6,7 @@ Date: 2022-10-14
 Maintainer: Marcelo Araya-Salas <marcelo.araya@ucr.ac.cr>
 Description: A poorly documented package with random, tangentially related functions to visualize or somehow manipulate brms models.
 License: GPL (>= 2)
-Imports: kableExtra, pbapply, brms (>= 2.18.0), HDInterval, ape, cowplot, ggdist, posterior, ggplot2, methods
+Imports: kableExtra, pbapply, brms (>= 2.18.0), ape, cowplot, ggdist, posterior, ggplot2, methods
 Depends: R (>= 3.5.0)
 URL: https://github.com/maRce10/brmsish
 BugReports: https://github.com/maRce10/brmsish/issues
