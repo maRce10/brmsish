@@ -10,14 +10,23 @@ and is being actively
 developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active)
 [![Licence](https://img.shields.io/badge/https://img.shields.io/badge/licence-GPL--2-blue.svg.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 [![minimal R
-version](https://img.shields.io/badge/R%3E%3D-%3E=%203.5.0-6666ff.svg)](https://cran.r-project.org/)[![packageversion](https://img.shields.io/badge/Package%20version-1.0.2-orange.svg?style=flat-square)](commits/develop)[![Last-changedate](https://img.shields.io/badge/last%20change-2022--10--14-yellowgreen.svg)](/commits/master)
+version](https://img.shields.io/badge/R%3E%3D-%3E=%203.5.0-6666ff.svg)](https://cran.r-project.org/)[![packageversion](https://img.shields.io/badge/Package%20version-1.0.0-orange.svg?style=flat-square)](commits/develop)[![Last-changedate](https://img.shields.io/badge/last%20change-2022--10--25-yellowgreen.svg)](/commits/master)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/brmsish)](https://cran.r-project.org/package=brmsish)
 [![Total
 Downloads](https://cranlogs.r-pkg.org/badges/grand-total/brmsish)](https://cranlogs.r-pkg.org/badges/grand-total/brmsish)
 
-A poorly documented package with random, tangentially related functions
-to do visualize or modify
-[brms](https://paul-buerkner.github.io/brms/index.html) models.
+A poorly documented package with a few random, tangentially related
+functions to visualize and/or modify
+[brms](https://paul-buerkner.github.io/brms/index.html) models. So far
+the package has functions for:
+
+-   Running multiple comparisons (e.g. contrasts) between levels of a
+    categorical variable
+-   Plotting posterior distributions and diagnostics plots in a
+    Rmarkdown friendly format
+-   Running models on a population of phylogenetic trees to account for
+    phylogenetic uncertainty
+-   Combining a bunch of models saved as RDS files
 
 <!-- Unlike other packages for setting up research compendiums, `brmsish` has very simple functionality. Hence, users can focus on the research project itself rather than on learning how to use a new R package. -->
 
