@@ -60,7 +60,7 @@ html_summary <-
 
     coef_table <- data.frame(summ)
     coef_table <-
-      coef_table[, c("Estimate", "Rhat", "Bulk_ESS", "l.95..CI", "u.95..CI")]
+      coef_table[, c("Estimate", "Rhat", "Bulk_ESS", "Tail_ESS", "l.95..CI", "u.95..CI")]
 
     # add priors to model table
     pt <- prior_summary(model)
@@ -92,6 +92,11 @@ html_summary <-
       sum(subset(np, Parameter == "divergent__")$Value)
     model_table$`rhats > 1.05` <-
       sum(stats::na.omit(brms::rhat(model)) > 1.05)
+
+    model_table$min_bulk_ESS <- min(coef_table$Bulk_ESS)
+    model_table$min_tail_ESS <- min(coef_table$Tail_ESS)
+
+    model_table$seed <- fit@stan_args[[1]]$seed
 
     coef_table <- as.data.frame(coef_table)
     coef_table$Rhat <- round(coef_table$Rhat, digits = 3)

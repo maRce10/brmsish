@@ -1,0 +1,10 @@
+* using log directory ‘/home/neuro/Dropbox/R_package_testing/brmsish/..Rcheck’
+* using R version 4.2.0 (2022-04-22)
+* using platform: x86_64-pc-linux-gnu (64-bit)
+* using session charset: UTF-8
+* using option ‘--as-cran’
+* checking for file ‘./DESCRIPTION’ ... ERROR
+Required field missing or empty:
+  ‘Author’
+* DONE
+Status: 1 ERROR
