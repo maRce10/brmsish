@@ -16,6 +16,7 @@
 #' @import cowplot
 #' @import ggdist
 #' @import posterior
+#' @importFrom methods is
 #' @author Marcelo Araya-Salas
 #'
 #' Maintainer: Marcelo Araya-Salas (\email{marcelo.araya@@ucr.ac.cr})
