@@ -1,4 +1,6 @@
 # prints a summary of brm model results. It includes a model table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files.
+
+# remember to add 'results = 'as.is' and warning = FALSE to chunk options and adjust fig.width
 html_summary <-
   function(model = NULL,
            gsub.pattern = NULL, # a vector with character strings to be replaced
@@ -9,7 +11,9 @@ html_summary <-
            read.file = NULL, # name of file to be read, if supplied 'model' is ignored
            plot.area.prop = 1, # proportion of the total effect size range (given by the minimum and maximum of all posterior samples) to plot (sort of xlim)
            remove.intercepts = FALSE,
-           fill = "#6DCD59FF") {
+           fill = "#6DCD59FF",
+           trace.palette = viridis,
+           effects = NULL) {
 
      # object for avoiding errors with ggplot functions when checking package
     significance <-
@@ -194,8 +198,26 @@ html_summary <-
 
     posteriors$significance <-
       sapply(posteriors$variable, function(x)
-        coef_table2$significance[coef_table2$variable == x])
+        coef_table2$significance[as.character(coef_table2$variable) == x])
 
+    # choose effects to display
+    if (!is.null(effects)){
+      posteriors <- posteriors[grep(paste(effects, collapse = "|"), posteriors$variable), ]
+      coef_table <- coef_table[grep(paste(effects, collapse = "|"), rownames(coef_table)), ]
+      coef_table2 <- coef_table2[grep(paste(effects, collapse = "|"), coef_table2$variable), ]
+      posteriors_by_chain <- posteriors_by_chain[grep(paste(effects, collapse = "|"), posteriors_by_chain$variable), ]
+    }
+
+    # order effects as in table
+      posteriors$variable <- factor(posteriors$variable, levels = coef_table2$variable)
+
+    # trick for getting own palette in ggplot2
+      scale_color_discrete <- function(...) scale_color_manual(..., values= trace.palette(length(unique(posteriors_by_chain$chain))))
+
+      on.exit(rm("scale_color_discrete"))
+
+
+    # creat plots
     gg_dists <-
       ggplot2::ggplot(data = posteriors, ggplot2::aes(y = variable, x = value, fill = significance)) +
       ggplot2::geom_vline(xintercept = 0,
@@ -233,9 +255,10 @@ html_summary <-
     gg_traces <-
       ggplot2::ggplot(data = posteriors_by_chain, ggplot2::aes(x = iteration, y = value, color = chain)) +
       ggplot2::geom_line() +
-      ggplot2::scale_color_viridis_d(alpha = 0.7,
-                                     begin = 0.2,
-                                     end = 0.9) +
+      # ggplot2::scale_color_viridis_d(alpha = 0.7,
+      #                                begin = 0.2,
+      #                                end = 0.9) +
+     scale_color_discrete() +
       ggplot2::facet_wrap(
         ~ variable,
         scales = "free_y",
