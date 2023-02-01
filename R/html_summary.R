@@ -7,13 +7,17 @@ html_summary <-
            gsub.replacement = NULL,  # a vector with character strings to use for replacement
            xlab = "Effect size",
            n.posterior = 2000, # number of posterior samples to use for plotting
-           model_name = NULL, # for adding it as a title
+           model.name = NULL, # for adding it as a title
            read.file = NULL, # name of file to be read, if supplied 'model' is ignored
            plot.area.prop = 1, # proportion of the total effect size range (given by the minimum and maximum of all posterior samples) to plot (sort of xlim)
            remove.intercepts = FALSE,
            fill = "#6DCD59FF",
-           trace.palette = viridis,
-           effects = NULL) {
+           trace.palette = viridis::viridis,
+           effects = NULL,
+           save = FALSE,
+           dest.path = ".",
+           overwrite = FALSE,
+           robust = FALSE) {
 
      # object for avoiding errors with ggplot functions when checking package
     significance <-
@@ -23,127 +27,100 @@ html_summary <-
       CI_low <-
       Hypothesis <- Parameter <- chain <- iteration <- NULL
 
+    if (is.null(model) & is.null(read.file))
+      stop("either 'model' or 'read.file' must be supplied")
+
+    if (!is.null(model) & is.null(model.name))
+      model.name <- deparse(substitute(model)) else
+        if (!is.null(read.file) & is.null(model.name))
+          model.name <- gsub("\\.rds$", "", basename(read.file), ignore.case = TRUE)
+
+    # skip everything if save TRUE and folder exists
+    if (!dir.exists(file.path(dest.path, model.name)) & save | !save | save & overwrite){
+
     if (is.null(model) & !is.null(read.file))
       model <- readRDS(read.file)
-
-    # extract info from model
-    summ <- summary(model)$fixed
-
-    if (remove.intercepts)
-      summ <-
-      summ[grep("^Intercept", rownames(summ), invert = TRUE),]
-
-
-    fit <- model$fit
-    betas <- grep("^b_", names(fit@sim$samples[[1]]), value = TRUE)
+    variables <- posterior::variables(model)
+    incl_classes <- c(
+      "b", "bs", "bcs", "bsp", "bmo", "bme", "bmi", "bm",
+      brms:::valid_dpars(model), "delta", "lncor", "rescor", "ar", "ma", "sderr",
+      "cosy", "cortime", "lagsar", "errorsar", "car", "sdcar", "rhocar",
+      "sd", "cor", "df", "sds", "sdgp", "lscale", "simo"
+    )
+    incl_regex <- paste0("^", brms:::regex_or(incl_classes), "(_|$|\\[)")
+    variables <- variables[grepl(incl_regex, variables)]
+    betas <- grep("^b_", variables, value = TRUE)
 
     # remove intercept betas
     if (remove.intercepts)
       betas <- grep("b_Intercept", betas, value = TRUE, invert = TRUE)
 
-    # subsample posteriors
-    xdrws <- brms::as_draws(model)
+    iterations <- model$fit@sim$iter
+    chains <- posterior::nchains(model)
+    warmup <- model$fit@sim$warmup
+    mod_formula <- as.character(model$formula[1])
+    diverg_transitions <- sum(brms::nuts_params(model, pars = "divergent__")$Value)
+    priors <- paste(apply(brms::prior_summary(model, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
+    seed <- model$fit@stan_args[[1]]$seed
+    thinning <- model$fit@stan_args[[1]]$thin
 
-    # only apply thinning if length of posterior < n.posterior
-    if (round(length(xdrws[[1]][[1]]) / n.posterior, 0) >= 2)
-      xdrws <-
-      posterior::thin_draws(xdrws, round(length(xdrws[[1]][[1]]) / n.posterior, 0))
+    # replace model with draws (to avoid having several huge objects)
+    model <- posterior::as_draws_array(model, variable = betas)
 
-    xdrws <- posterior::subset_draws(x = xdrws, variable = betas)
-    sub_posts_by_chain_list <- lapply(1:length(xdrws), function(x) {
-      X <- as.data.frame(xdrws[[x]])
-      X$chain <- paste("chain", x)
-      return(X)
-    })
-
-    sub_posts_by_chain <- do.call(rbind, sub_posts_by_chain_list)
-
-    merged_xdrws <- posterior::merge_chains(xdrws)
-    sub_posts <- as.data.frame(merged_xdrws)
-    names(sub_posts) <- betas
-
-    coef_table <- data.frame(summ)
-    coef_table <-
-      coef_table[, c("Estimate", "Rhat", "Bulk_ESS", "Tail_ESS", "l.95..CI", "u.95..CI")]
-
-    # add priors to model table
-    pt <- prior_summary(model)
-    b_prior <- pt$prior[pt$class == "b" & pt$coef == ""]
-    b_prior <- if (b_prior == "")
-      "flat" else
-      b_prior
-
-    sd_prior <- unique(pt$prior[pt$class == "sd" & pt$coef == ""])
-    sd_prior <- if (length(sd_prior) > 1)
-      sd_prior[sd_prior != ""] else
-      "flat"
-    sd_prior <- if (sd_prior == "")
-      "flat" else
-      sd_prior
+    coef_table <- .summary(model, variables = betas, probs = c(0.025, 0.975), robust = robust)
 
     model_table <-
       data.frame(
-        b_prior,
-        sd_prior,
-        iterations = fit@stan_args[[1]]$iter,
-        chains = length(attr(fit, "stan_args")),
-        thinning = fit@stan_args[[1]]$thin,
-        warmup = fit@stan_args[[1]]$warmup
+        priors = priors,
+        formula = mod_formula,
+        iterations = iterations,
+        chains = chains,
+        thinning = thinning,
+        warmup = warmup,
+        diverg_transitions = diverg_transitions,
+        `rhats > 1.05` = sum(coef_table$Rhat > 1.05),
+        min_bulk_ESS = min(coef_table$Bulk_ESS),
+        min_tail_ESS = min(coef_table$Tail_ESS),
+        seed = seed
       )
 
-    np <- brms::nuts_params(model)
-    model_table$diverg_transitions <-
-      sum(subset(np, Parameter == "divergent__")$Value)
-    model_table$`rhats > 1.05` <-
-      sum(stats::na.omit(brms::rhat(model)) > 1.05)
+    # thin before getting chain data for trace plot
+    if (round(model_table$iterations / n.posterior, 0) >= 2)
+      model <-
+      posterior::thin_draws(model, model_table$iterations / n.posterior, 0)
 
-    model_table$min_bulk_ESS <- min(coef_table$Bulk_ESS)
-    model_table$min_tail_ESS <- min(coef_table$Tail_ESS)
+    # data by chain for trace plot
+    posteriors_by_chain <- do.call(rbind, lapply(betas, function(x) {
 
-    model_table$seed <- fit@stan_args[[1]]$seed
-
-    coef_table <- as.data.frame(coef_table)
-    coef_table$Rhat <- round(coef_table$Rhat, digits = 3)
-    coef_table$CI_low <-
-      round(unlist(coef_table$l.95..CI), digits = 3)
-    coef_table$CI_high <-
-      round(unlist(coef_table$u.95..CI), digits = 3)
-    coef_table$l.95..CI <- coef_table$u.95..CI <- NULL
-
-    out <-
-      lapply(betas, function(y)
-        data.frame(
-          variable = y,
-          value = sort(sub_posts[, colnames(sub_posts) == y], decreasing = FALSE)
-        ))
-
-    posteriors <- do.call(rbind, out)
-    posteriors$variable <-
-      factor(posteriors$variable, levels = sort(unique(posteriors$variable)))
-
-    names(sub_posts_by_chain)[1:(ncol(sub_posts_by_chain) - 1)] <-
-      betas
-
-    out2 <- lapply(betas, function(y)  {
-      X <-
-        data.frame(variable = y,
-                   chain = sub_posts_by_chain[, "chain"],
-                   value = sub_posts_by_chain[, y])
+      X <- as.data.frame(model[,, x])
+      names(X) <- paste("chain", 1:ncol(X))
+      X <- stack(X)
+      X$variable <- x
       X$iteration <-
-        round(seq(1, fit@stan_args[[1]]$iter, length.out = nrow(X) / length(attr(
-          fit, "stan_args"
-        ))))
+        round(seq(1, model_table$iterations, length.out = nrow(X) / model_table$chains))
+      names(X) <- c("value", "chain", "variable", "iteration")
       return(X)
-    })
+    }))
 
-    posteriors_by_chain <- do.call(rbind, out2)
+    # merge chains
+    model <- as.data.frame(posterior::merge_chains(model))
+    names(model) <- betas
+
+    model <- do.call(rbind, lapply(betas, function(y)
+      data.frame(
+        variable = y,
+        value = sort(model[, colnames(model) == y], decreasing = FALSE)
+      )))
+
+    model$variable <-
+      factor(model$variable, levels = sort(unique(model$variable)))
 
     coef_table2 <- coef_table
     coef_table2$variable <-
-      factor(paste0("b_", rownames(coef_table2)))
+      factor(rownames(coef_table2))
     coef_table2$value <- coef_table2$Estimate
     coef_table2$significance <-
-      ifelse(coef_table2$CI_low * coef_table2$CI_high > 0, "sig", "non-sig")
+      ifelse(coef_table2$`l-95% CI` * coef_table2$`u-95% CI` > 0, "sig", "non-sig")
     coef_table2$significance <-
       factor(coef_table2$significance, levels = c("non-sig", "sig"))
 
@@ -157,10 +134,10 @@ html_summary <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
                posteriors_by_chain$variable)
-        posteriors$variable <-
+        model$variable <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
-               posteriors$variable)
+               model$variable)
         coef_table2$variable <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
@@ -169,12 +146,7 @@ html_summary <-
       }
     }
 
-
-    if (!is.null(gsub.pattern) & !is.null(gsub.replacement)) {
-
-    }
-
-    posteriors_by_chain$variable <-
+posteriors_by_chain$variable <-
       factor(posteriors_by_chain$variable,
              levels = sort(unique(posteriors_by_chain$variable), decreasing = TRUE))
 
@@ -195,31 +167,29 @@ html_summary <-
                 grDevices::adjustcolor(fill, alpha.f = 0.5)
               )
 
-
-    posteriors$significance <-
-      sapply(posteriors$variable, function(x)
+    model$significance <-
+      sapply(model$variable, function(x)
         coef_table2$significance[as.character(coef_table2$variable) == x])
 
     # choose effects to display
     if (!is.null(effects)){
-      posteriors <- posteriors[grep(paste(effects, collapse = "|"), posteriors$variable), ]
+      model <- model[grep(paste(effects, collapse = "|"), model$variable), ]
       coef_table <- coef_table[grep(paste(effects, collapse = "|"), rownames(coef_table)), ]
       coef_table2 <- coef_table2[grep(paste(effects, collapse = "|"), coef_table2$variable), ]
       posteriors_by_chain <- posteriors_by_chain[grep(paste(effects, collapse = "|"), posteriors_by_chain$variable), ]
     }
 
     # order effects as in table
-      posteriors$variable <- factor(posteriors$variable, levels = coef_table2$variable)
+      model$variable <- factor(model$variable, levels = coef_table2$variable)
 
     # trick for getting own palette in ggplot2
-      scale_color_discrete <- function(...) scale_color_manual(..., values= trace.palette(length(unique(posteriors_by_chain$chain))))
+      scale_color_discrete <- function(...) ggplot2::scale_color_manual(..., values= trace.palette(length(unique(posteriors_by_chain$chain))))
 
       on.exit(rm("scale_color_discrete"))
 
-
     # creat plots
     gg_dists <-
-      ggplot2::ggplot(data = posteriors, ggplot2::aes(y = variable, x = value, fill = significance)) +
+      ggplot2::ggplot(data = model, ggplot2::aes(y = variable, x = value, fill = significance)) +
       ggplot2::geom_vline(xintercept = 0,
                           col = "black",
                           lty = 2) +
@@ -232,7 +202,7 @@ html_summary <-
       ggplot2::scale_fill_manual(values = fill_values, guide = 'none') +
       ggplot2::geom_point(data = coef_table2) +
       ggplot2::geom_errorbar(data = coef_table2,
-                             ggplot2::aes(xmin = CI_low, xmax = CI_high),
+                             ggplot2::aes(xmin = `l-95% CI`, xmax = `u-95% CI`),
                              width = 0) +
       ggplot2::scale_color_manual(values = col_pointrange) +
       ggplot2::facet_wrap(
@@ -280,106 +250,76 @@ html_summary <-
                          ncol = 2,
                          rel_widths = c(2, 1))
 
+    if (save){
+
+      dir.create(file.path(dest.path, model.name))
+
+      cowplot::ggsave2(filename = file.path(dest.path, model.name, "plot.jpeg"), plot = gg)
+    }
+
     if (!is.null(gsub.pattern) & !is.null(gsub.replacement))
       rownames(coef_table) <-
       gsub(pattern = gsub.pattern,
            replacement = gsub.replacement,
            rownames(coef_table))
 
-    coef_table$Rhat <-
-      ifelse(
-        coef_table$Rhat > 1.05,
-        cell_spec(
-          coef_table$Rhat,
-          "html",
-          color = "white",
-          background = "red",
-          bold = TRUE,
-          font_size = 12
-        ),
-        cell_spec(coef_table$Rhat, "html")
-      )
+    # save output
+    if (save)
+      saveRDS(object = list(model_table = model_table, coef_table = coef_table, graph = gg), file.path(dest.path, model.name, "model_table.RDS")) else {
+    if (!is.null(model.name))
+        cat('\n\n## ', model.name, '\n\n')
 
-    signif <- coef_table[, "CI_low"] * coef_table[, "CI_high"] > 0
+        # print model summary table
+        model_table <- html_format_model_table(model_table)
 
-    model_table$diverg_transitions <-
-      ifelse(
-        model_table$diverg_transitions > 0,
-        cell_spec(
-          model_table$diverg_transitions,
-          "html",
-          color = "white",
-          background = "red",
-          bold = TRUE,
-          font_size = 12
-        ),
-        cell_spec(model_table$diverg_transitions, "html")
-      )
+        print(model_table)
 
-    model_table$`rhats > 1.05` <-
-      ifelse(
-        model_table$`rhats > 1.05` > 0,
-        cell_spec(
-          model_table$`rhats > 1.05`,
-          "html",
-          color = "white",
-          background = "red",
-          bold = TRUE,
-          font_size = 12
-        ),
-        cell_spec(model_table$`rhats > 1.05`, "html")
-      )
+        # print estimates
+        coef_table <- html_format_coef_table(coef_table, fill = fill)
+
+        # print model result table
+        print(coef_table)
+
+         print(gg)
+      }
+  } else
+    message("Folder already exists and overwrite = FALSE")
+}
 
 
-    df1 <-
-      kbl(
-        model_table,
-        row.names = TRUE,
-        escape = FALSE,
-        format = "html",
-        digits = 3
-      )
+## helper taken from brms
+.summary <- function(draws, variables, probs, robust) {
 
-    df1 <-
-      kable_styling(
-        df1,
-        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-        full_width = FALSE,
-        font_size = 12
-      )
-
-
-    df2 <-
-      kbl(
-        coef_table,
-        row.names = TRUE,
-        escape = FALSE,
-        format = "html",
-        digits = 3
-      )
-
-    df2 <-
-      row_spec(
-        kable_input = df2,
-        row =  which(coef_table$CI_low * coef_table$CI_high > 0),
-        background = grDevices::adjustcolor(fill, alpha.f = 0.3)
-      )
-
-    df2 <-
-      kable_styling(
-        df2,
-        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-        full_width = FALSE,
-        font_size = 12
-      )
-
-    if (!is.null(model_name))
-      cat(paste('<font size="4"><b>', model_name, '</b></font><br>'))
-
-    cat(paste('<font size="3"><b>', model$formula[1], '</b></font>'))
-
-    print(df1)
-    print(df2)
-
-    print(gg)
+  .quantile <- function(x, ...) {
+    qs <- posterior::quantile2(x, probs = probs, ...)
+    prob <- probs[2] - probs[1]
+    names(qs) <- paste0(c("l-", "u-"), prob * 100, "% CI")
+    return(qs)
   }
+  draws <- posterior::subset_draws(draws, variable = variables)
+  measures <- list()
+  if (robust) {
+    measures$Estimate <- median
+    # if (mc_se) {
+    #   measures$MCSE <- posterior::mcse_median
+    # }
+    # measures$Est.Error <- mad
+  } else {
+    measures$Estimate <- mean
+    # if (mc_se) {
+    #   measures$MCSE <- posterior::mcse_mean
+    # }
+    # measures$Est.Error <- sd
+  }
+
+  measures$quantiles <- .quantile
+  measures$Rhat <- posterior::rhat
+  measures$Bulk_ESS <- posterior::ess_bulk
+  measures$Tail_ESS <- posterior::ess_tail
+
+  out <- do.call(posterior::summarize_draws, c(list(draws), measures))
+  out <- as.data.frame(out)
+  rownames(out) <- out$variable
+  out$variable <- NULL
+  return(out)
+}

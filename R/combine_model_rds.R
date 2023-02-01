@@ -7,12 +7,16 @@ combine_model_rds <-
            name = NULL,
            overwrite = FALSE,
            suffix = "-combined_model",
-           check_data = TRUE) {
+           check_data = TRUE,
+           verbose = TRUE) {
     if (is.null(name))
       name <- basename(path)
 
     file.name <-
       file.path(dest.path, paste0(name, suffix, ".RDS"))
+
+    if (file.exists(file.name) & !overwrite)
+      message(paste0("model ", basename(file.name), " already existed (overwrite = FALSE)"))
 
     if (!file.exists(file.name) | overwrite) {
       mods_rds <-
@@ -25,12 +29,22 @@ combine_model_rds <-
 
       mods_list <- lapply(mods_rds, readRDS)
 
-      mods_comb <- combine_models(mlist = mods_list, check_data = check_data)
+    combine_success <- try(mods_comb <- combine_models(mlist = mods_list, check_data = check_data), silent = TRUE)
 
-      if (save) {
+    if (is(combine_success, "try-error")){
+
+      if (verbose)
+        message(paste0("model ", basename(file.name), " successfully combined (", length(mods_rds), " RDS files)"))
+
+            if (!is(combine_success, "try-error"))
+              if (save) {
         saveRDS(mods_comb, file.name)
         return(NULL)
       } else
         return(mods_comb)
     }
+    if (verbose)
+      message(paste("model", file.name, "could not be combined"))
+
   }
+}
