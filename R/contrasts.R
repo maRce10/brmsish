@@ -10,9 +10,15 @@ contrasts <-
            n.posterior = 2000, # number of posterior samples to use for plotting
            fill = "#6DCD59FF",
            sort.levels = NULL,
-           html.table = FALSE,
-           plot = FALSE
+           html.table  = FALSE,
+           read.file = NULL,
+           plot = FALSE,
+           plot.area.prop = 1, # as in html_summary()
+           highlight = FALSE # as in html_summary()
            ) {
+
+    if (is.null(model) & is.null(read.file))
+      stop("either 'model' or 'read.file' must be supplied")
 
     # object for avoiding errors with ggplot functions when checking package
     significance <-
@@ -22,9 +28,19 @@ contrasts <-
       CI_low <-
       Hypothesis <- Parameter <- chain <- iteration <- NULL
 
-    fit <- model$fit
-    betas <- grep("^b_", names(fit@sim$samples[[1]]), value = TRUE)
-    model_levels <- gsub("^b_", "", betas)
+    if (is.null(model) & !is.null(read.file))
+      model <- readRDS(read.file)
+    variables <- posterior::variables(model)
+    incl_classes <- c(
+      "b", "bs", "bcs", "bsp", "bmo", "bme", "bmi", "bm",
+      brms:::valid_dpars(model), "delta", "lncor", "rescor", "ar", "ma", "sderr",
+      "cosy", "cortime", "lagsar", "errorsar", "car", "sdcar", "rhocar",
+      "sd", "cor", "df", "sds", "sdgp", "lscale", "simo"
+    )
+    incl_regex <- paste0("^", brms:::regex_or(incl_classes), "(_|$|\\[)")
+
+    variables <- variables[grepl(incl_regex, variables)]
+    model_levels <- gsub("^b_", "", variables)
     model_levels <- grep(paste0("^Intercept$|", predictor), model_levels, value = TRUE)
 
     # fix  baseline level
@@ -73,7 +89,6 @@ contrasts <-
           gsub(gsub.pattern[i], gsub.replacement[i], names(contrsts))
     }
 
-
     # evaluate hypothesis
     hyps <- brms::hypothesis(model, contrsts)
 
@@ -85,37 +100,43 @@ contrasts <-
                           "CI.Upper")]
 
     hyp_table$Estimate <- hyp_table$Estimate * levels_df$sign
-    hyp_table$CI.Lower <- hyp_table$CI.Lower * levels_df$sign
-    hyp_table$CI.Upper <- hyp_table$CI.Upper * levels_df$sign
+    hyp_table$`l-95% CI` <- hyp_table$CI.Lower * levels_df$sign
+    hyp_table$`u-95% CI` <- hyp_table$CI.Upper * levels_df$sign
+    hyp_table$CI.Lower <- hyp_table$CI.Upper <- NULL
 
     if (html.table){
-      signif <- hyp_table[, "CI.Lower"] * hyp_table[, "CI.Upper"] > 0
+    #   signif <- hyp_table[, "l-95% CI"] * hyp_table[, "u-95% CI"] > 0
+    #
+    #   html_table <-
+    #   kbl(
+    #     hyp_table,
+    #     row.names = TRUE,
+    #     escape = FALSE,
+    #     format = "html",
+    #     digits = 3
+    #   )
+    #
+    #   if (highlight)
+    # html_table <-
+    #   row_spec(
+    #     kable_input = html_table,
+    #     row =  which(hyp_table$`l-95% CI` * hyp_table$`u-95% CI` > 0),
+    #     background = grDevices::adjustcolor(fill, alpha.f = 0.3)
+    #   )
+    #
+    # html_table <-
+    #   kable_styling(
+    #     html_table,
+    #     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
+    #     full_width = FALSE,
+    #     font_size = 12
+    #   )
 
-      html_table <-
-      kbl(
-        hyp_table,
-        row.names = TRUE,
-        escape = FALSE,
-        format = "html",
-        digits = 3
-      )
+      # print estimates
+      html_table <- html_format_coef_table(hyp_table, fill = fill,  highlight = highlight)
 
-    html_table <-
-      row_spec(
-        kable_input = html_table,
-        row =  which(hyp_table$CI.Lower * hyp_table$CI.Upper > 0),
-        background = grDevices::adjustcolor(fill, alpha.f = 0.3)
-      )
-
-    html_table <-
-      kable_styling(
-        html_table,
-        bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-        full_width = FALSE,
-        font_size = 12
-      )
-
-    print(html_table)
+      # print model result table
+      print(html_table)
     }
 
     if (plot){
@@ -136,9 +157,9 @@ contrasts <-
     sub_posts <- as.data.frame(merged_xdrws)[, names(contrsts)]
     names(sub_posts) <- names(contrsts)
 
-    hyp_table$CI_low <- round(hyp_table$CI.Lower, digits = 3)
-    hyp_table$CI_high <- round(hyp_table$CI.Upper, digits = 3)
-    hyp_table$CI.Lower <- hyp_table$CI.Upper <- NULL
+    hyp_table$CI_low <- round(hyp_table$`l-95% CI`, digits = 3)
+    hyp_table$CI_high <- round(hyp_table$`u-95% CI`, digits = 3)
+    hyp_table$`l-95% CI` <- hyp_table$`u-95% CI` <- NULL
 
     out <-
       lapply(names(contrsts), function(y)
@@ -158,22 +179,21 @@ contrasts <-
     coef_table2$significance <-
       factor(coef_table2$significance, levels = c("non-sig", "sig"))
 
-    col_pointrange <-
-      if (all(coef_table2$significance == "non-sig"))
-        "gray" else
-      if (all(coef_table2$significance == "sig"))
-        "black" else
-      c("gray", "black")
+    if (highlight)
+      col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black")
+    else col_pointrange <- rep("black", nrow(coef_table2))
 
     fill_values <-
-      if (all(coef_table2$significance == "non-sig"))
-        grDevices::adjustcolor(fill, alpha.f = 0.25) else
-          if (all(coef_table2$significance == "sig"))
-            grDevices::adjustcolor(fill, alpha.f = 0.5) else
-              c(
-                grDevices::adjustcolor(fill, alpha.f = 0.25),
-                grDevices::adjustcolor(fill, alpha.f = 0.5)
-              )
+      if (!highlight)
+        rep(grDevices::adjustcolor(fill, alpha.f = 0.5), nrow(coef_table2)) else
+          if (all(coef_table2$significance == "non-sig"))
+            grDevices::adjustcolor(fill, alpha.f = 0.25) else
+              if (all(coef_table2$significance == "sig"))
+                grDevices::adjustcolor(fill, alpha.f = 0.5) else
+                  c(
+                    grDevices::adjustcolor(fill, alpha.f = 0.25),
+                    grDevices::adjustcolor(fill, alpha.f = 0.5)
+                  )
 
     posteriors$significance <-
       sapply(posteriors$Hypothesis, function(x)
@@ -204,7 +224,7 @@ contrasts <-
       ggplot2::geom_errorbar(data = coef_table2,
                              ggplot2::aes(xmin = CI_low, xmax = CI_high),
                              width = 0) +
-      ggplot2::scale_color_manual(values = col_pointrange) +
+      # ggplot2::scale_color_manual(values = col_pointrange) +
       ggplot2::theme_classic() +
       ggplot2::theme(
         axis.ticks.length = ggplot2::unit(0, "pt"),
@@ -213,7 +233,8 @@ contrasts <-
         strip.background = ggplot2::element_blank(),
         strip.text.y = ggplot2::element_blank()
       ) +
-      ggplot2::labs(x = xlab, y = "Contrasts")
+      ggplot2::labs(x = xlab, y = "Contrasts") +
+      ggplot2::xlim(range(c(posteriors$value, 0)) * plot.area.prop)
 
 
     print(gg_distribution)

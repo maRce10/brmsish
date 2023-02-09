@@ -8,7 +8,11 @@ combine_model_rds <-
            overwrite = FALSE,
            suffix = "-combined_model",
            check_data = TRUE,
-           verbose = TRUE) {
+           verbose = TRUE,
+           summary = FALSE,
+           ...
+           ) {
+
     if (is.null(name))
       name <- basename(path)
 
@@ -31,20 +35,21 @@ combine_model_rds <-
 
     combine_success <- try(mods_comb <- combine_models(mlist = mods_list, check_data = check_data), silent = TRUE)
 
-    if (is(combine_success, "try-error")){
+    if (!is(combine_success, "try-error")){
 
       if (verbose)
-        message(paste0("model ", basename(file.name), " successfully combined (", length(mods_rds), " RDS files)"))
+        message(paste0("model ", name, " successfully combined (", length(mods_rds), " RDS files)"))
 
-            if (!is(combine_success, "try-error"))
+      if (summary)
+        html_summary(model = mods_comb, dest.path = dest.path, save = TRUE, ...)
+
               if (save) {
         saveRDS(mods_comb, file.name)
         return(NULL)
       } else
         return(mods_comb)
-    }
+    } else
     if (verbose)
-      message(paste("model", file.name, "could not be combined"))
-
+      message(paste("models at folder", name, "could not be combined"))
   }
 }

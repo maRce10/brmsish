@@ -17,7 +17,11 @@ html_summary <-
            save = FALSE,
            dest.path = ".",
            overwrite = FALSE,
-           robust = FALSE) {
+           robust = FALSE,
+           width = 8,
+           height = "dynamic",
+           highlight = FALSE
+           ) {
 
      # object for avoiding errors with ggplot functions when checking package
     significance <-
@@ -67,7 +71,7 @@ html_summary <-
     # replace model with draws (to avoid having several huge objects)
     model <- posterior::as_draws_array(model, variable = betas)
 
-    coef_table <- .summary(model, variables = betas, probs = c(0.025, 0.975), robust = robust)
+    coef_table <- draw_summary(model, variables = betas, probs = c(0.025, 0.975), robust = robust)
 
     model_table <-
       data.frame(
@@ -142,7 +146,10 @@ html_summary <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
                coef_table2$variable)
-
+        rownames(coef_table) <-
+          gsub(pattern = gsub.pattern[i],
+               replacement = gsub.replacement[i],
+               rownames(coef_table))
       }
     }
 
@@ -150,12 +157,16 @@ posteriors_by_chain$variable <-
       factor(posteriors_by_chain$variable,
              levels = sort(unique(posteriors_by_chain$variable), decreasing = TRUE))
 
-    col_pointrange <-
-      if (all(coef_table2$significance == "non-sig"))
-        "gray" else
-      if (all(coef_table2$significance == "sig"))
-        "black" else
-      c("gray", "black")
+# define colors for point range in distribution plot
+if (highlight)
+col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black")
+else col_pointrange <- rep("black", nrow(coef_table2))
+
+    # define color for posterior distribution
+    # fill_values <- rep(grDevices::adjustcolor(fill, alpha.f = 0.5), nrow(coef_table2))
+    #
+    # if (highlight)
+    # fill_values <- ifelse(coef_table2$significance == "no-sig", grDevices::adjustcolor(fill, alpha.f = 0.25), fill_values)
 
     fill_values <-
       if (all(coef_table2$significance == "non-sig"))
@@ -166,6 +177,9 @@ posteriors_by_chain$variable <-
                 grDevices::adjustcolor(fill, alpha.f = 0.25),
                 grDevices::adjustcolor(fill, alpha.f = 0.5)
               )
+
+    if (!highlight)
+      fill_values <- rep(grDevices::adjustcolor(fill, alpha.f = 0.5), length(fill_values))
 
     model$significance <-
       sapply(model$variable, function(x)
@@ -188,7 +202,7 @@ posteriors_by_chain$variable <-
       on.exit(rm("scale_color_discrete"))
 
     # creat plots
-    gg_dists <-
+    gg_distributions <-
       ggplot2::ggplot(data = model, ggplot2::aes(y = variable, x = value, fill = significance)) +
       ggplot2::geom_vline(xintercept = 0,
                           col = "black",
@@ -200,11 +214,10 @@ posteriors_by_chain$variable <-
         color = "transparent"
       ) +
       ggplot2::scale_fill_manual(values = fill_values, guide = 'none') +
-      ggplot2::geom_point(data = coef_table2) +
+      ggplot2::geom_point(data = coef_table2, col = col_pointrange) +
       ggplot2::geom_errorbar(data = coef_table2,
                              ggplot2::aes(xmin = `l-95% CI`, xmax = `u-95% CI`),
-                             width = 0) +
-      ggplot2::scale_color_manual(values = col_pointrange) +
+                             width = 0, col = col_pointrange) +
       ggplot2::facet_wrap(
         ~ variable,
         scales = "free_y",
@@ -218,16 +231,15 @@ posteriors_by_chain$variable <-
         strip.background = ggplot2::element_blank(),
         strip.text = ggplot2::element_blank()
       ) +
-      ggplot2::labs(x = "Effect size", y = "Parameter") +
+      ggplot2::labs(x = "Effect size", y = "Parameter")
 
-      ggplot2::xlim(range(c(posteriors_by_chain$value, 0)) * plot.area.prop)
+
+if (plot.area.prop != 1)
+  gg_distributions <- gg_distributions + ggplot2::xlim(range(c(posteriors_by_chain$value, 0)) * plot.area.prop)
 
     gg_traces <-
       ggplot2::ggplot(data = posteriors_by_chain, ggplot2::aes(x = iteration, y = value, color = chain)) +
       ggplot2::geom_line() +
-      # ggplot2::scale_color_viridis_d(alpha = 0.7,
-      #                                begin = 0.2,
-      #                                end = 0.9) +
      scale_color_discrete() +
       ggplot2::facet_wrap(
         ~ variable,
@@ -245,23 +257,22 @@ posteriors_by_chain$variable <-
       )
 
     gg <-
-      cowplot::plot_grid(gg_dists,
+      cowplot::plot_grid(gg_distributions,
                          gg_traces,
                          ncol = 2,
-                         rel_widths = c(2, 1))
+                         rel_widths = c(1.8, 1))
 
     if (save){
 
       dir.create(file.path(dest.path, model.name))
 
-      cowplot::ggsave2(filename = file.path(dest.path, model.name, "plot.jpeg"), plot = gg)
-    }
 
-    if (!is.null(gsub.pattern) & !is.null(gsub.replacement))
-      rownames(coef_table) <-
-      gsub(pattern = gsub.pattern,
-           replacement = gsub.replacement,
-           rownames(coef_table))
+      if (height == "dynamic")
+        height <- 3 + 0.4 * length(betas)
+      if (height > 49) height <- 49
+
+      cowplot::ggsave2(filename = file.path(dest.path, model.name, "plot.jpeg"), plot = gg, width = width, height = height)
+    }
 
     # save output
     if (save)
@@ -275,7 +286,7 @@ posteriors_by_chain$variable <-
         print(model_table)
 
         # print estimates
-        coef_table <- html_format_coef_table(coef_table, fill = fill)
+        coef_table <- html_format_coef_table(coef_table, fill = fill,  highlight = highlight)
 
         # print model result table
         print(coef_table)
@@ -284,42 +295,4 @@ posteriors_by_chain$variable <-
       }
   } else
     message("Folder already exists and overwrite = FALSE")
-}
-
-
-## helper taken from brms
-.summary <- function(draws, variables, probs, robust) {
-
-  .quantile <- function(x, ...) {
-    qs <- posterior::quantile2(x, probs = probs, ...)
-    prob <- probs[2] - probs[1]
-    names(qs) <- paste0(c("l-", "u-"), prob * 100, "% CI")
-    return(qs)
-  }
-  draws <- posterior::subset_draws(draws, variable = variables)
-  measures <- list()
-  if (robust) {
-    measures$Estimate <- median
-    # if (mc_se) {
-    #   measures$MCSE <- posterior::mcse_median
-    # }
-    # measures$Est.Error <- mad
-  } else {
-    measures$Estimate <- mean
-    # if (mc_se) {
-    #   measures$MCSE <- posterior::mcse_mean
-    # }
-    # measures$Est.Error <- sd
-  }
-
-  measures$quantiles <- .quantile
-  measures$Rhat <- posterior::rhat
-  measures$Bulk_ESS <- posterior::ess_bulk
-  measures$Tail_ESS <- posterior::ess_tail
-
-  out <- do.call(posterior::summarize_draws, c(list(draws), measures))
-  out <- as.data.frame(out)
-  rownames(out) <- out$variable
-  out$variable <- NULL
-  return(out)
 }
