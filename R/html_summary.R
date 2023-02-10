@@ -20,7 +20,8 @@ html_summary <-
            robust = FALSE,
            width = 8,
            height = "dynamic",
-           highlight = FALSE
+           highlight = FALSE,
+           print.name = TRUE
            ) {
 
      # object for avoiding errors with ggplot functions when checking package
@@ -277,7 +278,8 @@ if (plot.area.prop != 1)
     # save output
     if (save)
       saveRDS(object = list(model_table = model_table, coef_table = coef_table, graph = gg), file.path(dest.path, model.name, "model_table.RDS")) else {
-    if (!is.null(model.name))
+
+      if (print.name)
         cat('\n\n## ', model.name, '\n\n')
 
         # print model summary table

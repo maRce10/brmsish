@@ -1,7 +1,7 @@
 # Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function brms::hypothesis is used internally.
 
 contrasts <-
-  function(model, # a brms model
+  function(model = NULL, # a brms model
            predictor, # name of categorical predictor
            level.sep = " - ", # string to use for separating level names
            xlab = "Effect size",
