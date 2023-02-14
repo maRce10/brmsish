@@ -105,32 +105,6 @@ contrasts <-
     hyp_table$CI.Lower <- hyp_table$CI.Upper <- NULL
 
     if (html.table){
-    #   signif <- hyp_table[, "l-95% CI"] * hyp_table[, "u-95% CI"] > 0
-    #
-    #   html_table <-
-    #   kbl(
-    #     hyp_table,
-    #     row.names = TRUE,
-    #     escape = FALSE,
-    #     format = "html",
-    #     digits = 3
-    #   )
-    #
-    #   if (highlight)
-    # html_table <-
-    #   row_spec(
-    #     kable_input = html_table,
-    #     row =  which(hyp_table$`l-95% CI` * hyp_table$`u-95% CI` > 0),
-    #     background = grDevices::adjustcolor(fill, alpha.f = 0.3)
-    #   )
-    #
-    # html_table <-
-    #   kable_styling(
-    #     html_table,
-    #     bootstrap_options = c("striped", "hover", "condensed", "responsive"),
-    #     full_width = FALSE,
-    #     font_size = 12
-    #   )
 
       # print estimates
       html_table <- html_format_coef_table(hyp_table, fill = fill,  highlight = highlight)
