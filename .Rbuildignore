@@ -14,3 +14,4 @@ README\.Rmd$
 ^\.github$
 ^CONTRIBUTING\.md$
 ^\.ccache$
+^tic\.R$
