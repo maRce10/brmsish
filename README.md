@@ -2,6 +2,7 @@ brmsish: miscellaneous functions to customize brms regression models
 ================
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- badges: start -->
 
 [![lifecycle](https://lifecycle.r-lib.org/articles/figures/lifecycle-experimental.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![Dependencies](https://tinyverse.netlify.com/badge/brmsish)](https://cran.r-project.org/package=brmsish)
@@ -14,6 +15,9 @@ version](https://img.shields.io/badge/R%3E%3D-%3E=%203.5.0-6666ff.svg)](https://
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/brmsish)](https://cran.r-project.org/package=brmsish)
 [![Total
 Downloads](https://cranlogs.r-pkg.org/badges/grand-total/brmsish)](https://cranlogs.r-pkg.org/badges/grand-total/brmsish)
+[![Codecov test
+coverage](https://codecov.io/gh/maRce10/ohun/branch/master/graph/badge.svg)](https://codecov.io/gh/maRce10/ohun?branch=master)[![R-CMD-check](https://github.com/maRce10/ohun/workflows/R-CMD-check/badge.svg)](https://github.com/maRce10/ohun/actions)
+<!-- badges: end -->
 
 This package offers functions to visualize and/or modify
 [brms](https://paul-buerkner.github.io/brms/index.html) models. It’s a
