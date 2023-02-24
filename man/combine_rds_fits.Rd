@@ -24,9 +24,9 @@ suffix = "-combined_model", check.data = TRUE, verbose = TRUE, summary = FALSE, 
 
 \item{verbose}{Logical to control if messages are printed into the console.}
 
-\item{summary}{Logical to control if a summary of the combined model is also saved. If TRUE \code{\link{fit_summary}} is used.}
+\item{summary}{Logical to control if a summary of the combined model is also saved. If TRUE \code{\link{extended_summary}} is used.}
 
-\item{...}{Additional arguments to be passed to \code{\link{fit_summary}} for further customizing summary.}
+\item{...}{Additional arguments to be passed to \code{\link{extended_summary}} for further customizing summary.}
 }
 \value{
 If \code{save  = TRUE} the combined fit is save as a RDS file, otherwise the function returns a brmsfit object.
@@ -54,13 +54,13 @@ combine_rds_fits(path = file.path(tempdir(), "rdss"))
 }
 \references{
 {
-Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 
 Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 }
 }
 \seealso{
-\code{\link{fit_summary}}, \code{\link{combine_rds_fits}}
+\code{\link{extended_summary}}, \code{\link{check_rds_fits}}
 }
 \author{
 Marcelo Araya-Salas \email{marcelo.araya@ucr.ac.cr})

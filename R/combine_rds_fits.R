@@ -10,9 +10,9 @@
 #' @param overwrite Logical to control if the RDS file is overwritten (when \code{save  = TRUE}).
 #' @param suffix Character string with a suffix to be added to the file name (when \code{save  = TRUE}). Default is "-combined_model".
 #' @param check.data Logical. Controls if the data should be checked for being the same across models (as in \code{\link[brms]{brm}}).
-#' @param summary Logical to control if a summary of the combined model is also saved. If TRUE \code{\link{fit_summary}} is used.
+#' @param summary Logical to control if a summary of the combined model is also saved. If TRUE \code{\link{extended_summary}} is used.
 #' @param verbose Logical to control if messages are printed into the console.
-#' @param ... Additional arguments to be passed to \code{\link{fit_summary}} for further customizing summary.
+#' @param ... Additional arguments to be passed to \code{\link{extended_summary}} for further customizing summary.
 #' @return If \code{save  = TRUE} the combined fit is save as a RDS file, otherwise the function returns a brmsfit object.
 #' @export
 #' @name combine_rds_fits
@@ -31,11 +31,11 @@
 #' # check fits
 #' combine_rds_fits(path = file.path(tempdir(), "rdss"))
 #' }
-#' @seealso \code{\link{fit_summary}}, \code{\link{combine_rds_fits}}
+#' @seealso \code{\link{extended_summary}}, \code{\link{check_rds_fits}}
 #' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
 #'
 #' @references {
-#' Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+#' Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 #'
 #' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 #' }
@@ -81,7 +81,7 @@ combine_rds_fits <-
         message(paste0("model fits at '", name, "' successfully combined (", length(mods_rds), " RDS files)"))
 
       if (summary)
-        fit_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, ...)
+        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, ...)
 
               if (save) {
         saveRDS(mods_comb, file.name)

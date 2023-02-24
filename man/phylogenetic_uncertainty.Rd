@@ -6,7 +6,7 @@
 \usage{
 phylogenetic_uncertainty(formula, data, phylos, sp.id.column, cores = 1,
 iter = 5000, fit.name, thin = 0, save.fits = FALSE,
-save.combined = FALSE, path = "./", ...)
+save.combined = FALSE, path = "./", pb = TRUE, ...)
 }
 \arguments{
 \item{formula}{A model formula. It must not include the random effect term referring to the phylogeny.}
@@ -31,6 +31,8 @@ save.combined = FALSE, path = "./", ...)
 
 \item{path}{Character string with the directory path in which to save model fit(s) (when either 'save.combined' or 'save.fits' are TRUE). The current working directory is used as default.}
 
+\item{pb}{Logical to control if a progress bar is used. Default is TRUE.}
+
 \item{...}{Additional arguments to be passed to \code{\link[brms]{brm}} for further customizing models.}
 }
 \value{
@@ -43,18 +45,38 @@ The function returns a fit model that combines all submodels with individual phy
 The function allows to take into account phylogenetic uncertainty when running phylogenetically informed regressions by running several models with a population of trees (ideally the highest posterior trees). Individual models are then combined into a single model fit.
 }
 \examples{
-{
+\dontrun{
+# example taken from https://cran.r-project.org/web/packages/brms/vignettes/brms_phylogenetics.html
+phylo <- ape::read.nexus("https://paul-buerkner.github.io/data/phylo.nex")
+
+# quick and dirty trick to make the phylo multiphylo by replicating it
+phylos <- list(phylo, phylo)
+class(phylos) <- "multiPhylo"
+
+data_simple <- read.table("https://paul-buerkner.github.io/data/data_simple.txt",
+header = TRUE)
+
+# run model
+pu_mod <- phylogenetic_uncertainty(phen ~ cofactor,                                data = data_simple, sp.id.column = "phylo", phylos = phylos,
+ iter = 3000, save.fits = FALSE,
+ save.combined = FALSE, chains = 1,
+ prior = c(
+ prior(normal(0, 10), "b"),
+ prior(normal(0, 50), "Intercept"),
+ prior(student_t(3, 0, 20), "sd"),
+ prior(student_t(3, 0, 20), "sigma"))
+ )
 }
 }
 \references{
 {
-Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 
 Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 }
 }
 \seealso{
-\code{\link{fit_summary}}, \code{\link{combine_rds_fits}}
+\code{\link{extended_summary}}, \code{\link{combine_rds_fits}}
 }
 \author{
 Marcelo Araya-Salas \email{marcelo.araya@ucr.ac.cr})

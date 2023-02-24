@@ -227,3 +227,217 @@ draw_summary <- function(draws, variables, probs, robust) {
   out$variable <- NULL
   return(out)
 }
+
+# taken from brms:::escape_all
+# .escape_all <- function (x)
+# {
+#   specials <- c(".", "*", "+", "?", "^", "$", "(", ")", "[",
+#                 "]", "|")
+#   for (s in specials) {
+#     x <- gsub(s, paste0("\\", s), x, fixed = TRUE)
+#   }
+#   x
+# }
+#
+# # taken from brms:::regex_or
+# .regex_or <- function (x, escape = FALSE)
+# {
+#   if (escape) {
+#     x <- .escape_all(x)
+#   }
+#   paste0("(", paste0("(", x, ")", collapse = "|"), ")")
+# }
+#
+# # taken from brms:::valid_dpars
+# .valid_dpars <- function (family, type = NULL, ...)
+# {
+#   if (!length(family)) {
+#     if (is.null(type)) {
+#       return("mu")
+#     }
+#     else {
+#       return(NULL)
+#     }
+#   }
+#   family <- .validate_family(family)
+#   info <- paste0(.usc(type, "suffix"), "dpars")
+#   .family_info(family, info, ...)
+# }
+#
+# # taken from brms:::.family_info
+# .family_info <- function (x, y, ...)
+# {
+#   x <- as_one_character(x)
+#   y <- as_one_character(y)
+#   if (y == "family") {
+#     return(x)
+#   }
+#   if (!nzchar(x)) {
+#     return(NULL)
+#   }
+#   info <- get(paste0(".family_", x))()
+#   if (y == "link") {
+#     out <- info$links[1]
+#   }
+#   else {
+#     info$links <- NULL
+#     out <- info[[y]]
+#   }
+#   out
+# }
+#
+# # taken from brms:::validate_family
+# .validate_family <- function (family, link = NULL, threshold = NULL)
+# {
+#   if (is.function(family)) {
+#     family <- family()
+#   }
+#   if (!is(family, "brmsfamily")) {
+#     if (is.family(family)) {
+#       link <- family$link
+#       family <- family$family
+#     }
+#     if (is.character(family)) {
+#       if (is.null(link)) {
+#         link <- family[2]
+#       }
+#       family <- .brmsfamily(family[1], link = link)
+#     }
+#     else {
+#       stop2("Argument 'family' is invalid.")
+#     }
+#   }
+#   if (is_ordinal(family) && !is.null(threshold)) {
+#     threshold <- match.arg(threshold, c("flexible", "equidistant"))
+#     family$threshold <- threshold
+#   }
+#   family
+# }
+#
+# # taken from  brms:::usc
+# .usc <- function (x, pos = c("prefix", "suffix"))
+# {
+#   pos <- match.arg(pos)
+#   x <- as.character(x)
+#   if (!length(x))
+#     x <- ""
+#   if (pos == "prefix") {
+#     x <- ifelse(nzchar(x), paste0("_", x), "")
+#   }
+#   else {
+#     x <- ifelse(nzchar(x), paste0(x, "_"), "")
+#   }
+#   x
+# }
+#
+#
+# .brmsfamily <- function (family, link = NULL, slink = link, threshold = "flexible",
+#                          refcat = NULL, bhaz = NULL, ...)
+# {
+#   family <- tolower(as_one_character(family))
+#   aux_links <- list(...)
+#   pattern <- c("^normal$", "^zi_", "^hu_")
+#   replacement <- c("gaussian", "zero_inflated_", "hurdle_")
+#   family <- rename(family, pattern, replacement, fixed = FALSE)
+#   ok_families <- lsp("brms", pattern = "^\\.family_")
+#   ok_families <- sub("^\\.family_", "", ok_families)
+#   if (!family %in% ok_families) {
+#     stop2(family, " is not a supported family. Supported ",
+#           "families are:\n", collapse_comma(ok_families))
+#   }
+#   family_info <- get(paste0(".family_", family))()
+#   ok_links <- family_info$links
+#   family_info$links <- NULL
+#   if (!is.character(slink)) {
+#     slink <- deparse(slink)
+#   }
+#   if (!slink %in% ok_links) {
+#     if (is.character(link)) {
+#       slink <- link
+#     }
+#     else if (!length(link) || identical(link, NA)) {
+#       slink <- NA
+#     }
+#   }
+#   if (length(slink) != 1L) {
+#     stop2("Argument 'link' must be of length 1.")
+#   }
+#   if (is.na(slink)) {
+#     slink <- ok_links[1]
+#   }
+#   if (!slink %in% ok_links) {
+#     stop2("'", slink, "' is not a supported link ", "for family '",
+#           family, "'.\nSupported links are: ", collapse_comma(ok_links))
+#   }
+#   out <- list(family = family, link = slink, linkfun = function(mu) link(mu,
+#                                                                          link = slink), linkinv = function(eta) inv_link(eta,
+#                                                                                                                          link = slink))
+#   out[names(family_info)] <- family_info
+#   class(out) <- c("brmsfamily", "family")
+#   all_valid_dpars <- c(valid_dpars(out), valid_dpars(out, type = "multi"))
+#   for (dp in all_valid_dpars) {
+#     alink <- as.character(aux_links[[paste0("link_", dp)]])
+#     if (length(alink)) {
+#       alink <- as_one_character(alink)
+#       valid_links <- links_dpars(dp)
+#       if (!alink %in% valid_links) {
+#         stop2("'", alink, "' is not a supported link ",
+#               "for parameter '", dp, "'.\nSupported links are: ",
+#               collapse_comma(valid_links))
+#       }
+#       out[[paste0("link_", dp)]] <- alink
+#     }
+#   }
+#   if (is_ordinal(out$family)) {
+#     thres_options <- c("flexible", "equidistant", "sum_to_zero")
+#     out$threshold <- match.arg(threshold, thres_options)
+#   }
+#   if (conv_cats_dpars(out$family)) {
+#     if (!has_joint_link(out$family)) {
+#       out$refcat <- NA
+#     }
+#     else if (!is.null(refcat)) {
+#       allow_na_ref <- !is_logistic_normal(out$family)
+#       out$refcat <- as_one_character(refcat, allow_na = allow_na_ref)
+#     }
+#   }
+#   if (is_cox(out$family)) {
+#     if (!is.null(bhaz)) {
+#       if (!is.list(bhaz)) {
+#         stop2("'bhaz' should be a list.")
+#       }
+#       out$bhaz <- bhaz
+#     }
+#     else {
+#       out$bhaz <- list()
+#     }
+#     if (is.null(out$bhaz$df)) {
+#       out$bhaz$df <- 5L
+#     }
+#     if (is.null(out$bhaz$intercept)) {
+#       out$bhaz$intercept <- TRUE
+#     }
+#   }
+#   out
+# }
+#
+# .as_one_character <- function (x, allow_na = FALSE)
+# {
+#   s <- substitute(x)
+#   x <- as.character(x)
+#   if (length(x) != 1L || anyNA(x) && !allow_na) {
+#     s <- deparse_combine(s, max_char = 100L)
+#     stop2("Cannot coerce '", s, "' to a single character value.")
+#   }
+#   x
+# }
+#
+# .is.family <- function (x)
+# {
+#   inherits(x, "family")
+# }
+#
+# .is_ordinal <- function (family)
+# {
+#   "ordinal" %in% .family_info(family, "specials")
+# }

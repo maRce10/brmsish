@@ -3,7 +3,7 @@
 export(check_rds_fits)
 export(combine_rds_fits)
 export(contrasts)
-export(fit_summary)
+export(extended_summary)
 export(phylogenetic_uncertainty)
 export(read_summary)
 import(ape)

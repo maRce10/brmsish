@@ -3,7 +3,7 @@
 \docType{package}
 \name{brmsish}
 \alias{brmsish}
-\title{brmsish: random stuff on brms bayesian models}
+\title{brmsish: miscellaneous functions to customize brms bayesian regression models}
 \description{
 A poorly documented package with a few random, tangentially related functions to visualize or somehow manipulate brms models.
 }

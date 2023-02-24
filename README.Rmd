@@ -1,5 +1,5 @@
 ---
-title: "brmsish: random stuff on brms bayesian models"
+title: "brmsish: miscellaneous functions to customize brms regression models"
 output: github_document
 editor_options: 
   chunk_output_type: console
@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 ```
 
 
-This package has a few tangentially related functions to visualize and/or modify [brms](https://paul-buerkner.github.io/brms/index.html) models. It's a collection of functions I have been accumulating as I use [brms](https://paul-buerkner.github.io/brms/index.html) for my statistical analyses. So far the package has functions for:
+This package offers functions to visualize and/or modify [brms](https://paul-buerkner.github.io/brms/index.html) models. It's a collection of functions that I have been accumulating as I have been trying to customize the output of [brms](https://paul-buerkner.github.io/brms/index.html) models. So far the package has functions for:
 
 - Running multiple comparisons (e.g. contrasts) between levels of a categorical variable
 - Plotting posterior distributions, trace plots and diagnostics plots in a Rmarkdown friendly format
@@ -44,9 +44,11 @@ library(brmsish)
 
 ```
 
-Use it under your own risk. But if you do, please cite [brmsish](https://marce10.github.io/brmsish/) as follows:
+The package documentation can be found [here](https://marce10.github.io/brmsish/).
 
-Araya-Salas (2022), *brmsish: random stuff on brms bayesian models*. R package version 1.0.0. 
+Please cite [brmsish](https://marce10.github.io/brmsish/) as follows:
+
+Araya-Salas (2022), *brmsish: Miscellaneous functions to customize brms bayesian regression models*. R package version 1.0.0. 
 
 
 # References

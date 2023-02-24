@@ -34,11 +34,11 @@
 #' # compute constrasts without plot
 #' contrasts(fit = mod, predictor = "Species", html.table = TRUE, plot = FALSE)
 #' }
-#' @seealso \code{\link{fit_summary}}, \code{\link{read_summary}}
+#' @seealso \code{\link{extended_summary}}, \code{\link{read_summary}}
 #' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
 #'
 #' @references {
-#' Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+#' Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 #'
 #' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 #' }

@@ -3,7 +3,7 @@
 #' @description \code{phylogenetic_uncertainty} runs a brms regression model across a population of phylogenetic trees.
 #' @usage phylogenetic_uncertainty(formula, data, phylos, sp.id.column, cores = 1,
 #' iter = 5000, fit.name, thin = 0, save.fits = FALSE,
-#' save.combined = FALSE, path = "./", ...)
+#' save.combined = FALSE, path = "./", pb = TRUE, ...)
 #' @param formula A model formula. It must not include the random effect term referring to the phylogeny.
 #' @param data A data frame containing the data to be used in the model.
 #' @param phylos An object of class 'multiPhylo' (see  \code{\link[ape]{multiphylo}}).
@@ -15,25 +15,45 @@
 #' @param save.fits Logical to control if single fits are saved as RDS files. Default is FALSE. If 'save.combined' is also FALSE then the model fit is returned into the R environment.
 #' @param save.combined Logical to control if the combined single fit is saved as a RDS file. Default is FALSE. If 'save.fits' is also FALSE then the model fit is returned into the R environment.
 #' @param path Character string with the directory path in which to save model fit(s) (when either 'save.combined' or 'save.fits' are TRUE). The current working directory is used as default.
+#' @param pb Logical to control if a progress bar is used. Default is TRUE.
 #' @param ... Additional arguments to be passed to \code{\link[brms]{brm}} for further customizing models.
 #' @return The function returns a fit model that combines all submodels with individual phylogenies. Individual submodels can be saved if \code{save.fits = TRUE}.
 #' @export
 #' @name phylogenetic_uncertainty
 #' @details The function allows to take into account phylogenetic uncertainty when running phylogenetically informed regressions by running several models with a population of trees (ideally the highest posterior trees). Individual models are then combined into a single model fit.
-#' @examples
-#' {
+#' @examples \dontrun{
+#' # example taken from https://cran.r-project.org/web/packages/brms/vignettes/brms_phylogenetics.html
+#' phylo <- ape::read.nexus("https://paul-buerkner.github.io/data/phylo.nex")
+#'
+#' # quick and dirty trick to make the phylo multiphylo by replicating it
+#' phylos <- list(phylo, phylo)
+#' class(phylos) <- "multiPhylo"
+#'
+#' data_simple <- read.table("https://paul-buerkner.github.io/data/data_simple.txt",
+#' header = TRUE)
+#'
+#' # run model
+#' pu_mod <- phylogenetic_uncertainty(phen ~ cofactor,                                data = data_simple, sp.id.column = "phylo", phylos = phylos,
+#'  iter = 3000, save.fits = FALSE,
+#'  save.combined = FALSE, chains = 1,
+#'  prior = c(
+#'  prior(normal(0, 10), "b"),
+#'  prior(normal(0, 50), "Intercept"),
+#'  prior(student_t(3, 0, 20), "sd"),
+#'  prior(student_t(3, 0, 20), "sigma"))
+#'  )
 #' }
-#' @seealso \code{\link{fit_summary}}, \code{\link{combine_rds_fits}}
+#' @seealso \code{\link{extended_summary}}, \code{\link{combine_rds_fits}}
 #' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
 #'
 #' @references {
-#' Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+#' Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 #'
 #' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 #' }
 
 
-phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores = 1, iter = 5000, fit.name, thin = 0, save.fits = FALSE, save.combined = FALSE, path = "./", ...){
+phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores = 1, iter = 5000, fit.name = "fit", thin = 0, save.fits = FALSE, save.combined = FALSE, path = "./", pb = TRUE, ...){
 
   if (!save.fits)
     single.fit <- TRUE else single.fit <- FALSE
@@ -56,7 +76,7 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
     dir.create(file.path(path, fit.name))
 
   # fit preliminary fit
-  print("fit or read base fit (fitted on the first tree)")
+  print("fitting base model (fitted on the first tree)")
 
   if (save.fits) {
     fits <- list.files(path = file.path(path, fit.name), pattern = fit.name, full.names = TRUE)
@@ -89,7 +109,7 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
 
   # Loop fit
   print("loop over trees")
-  m.fits <- pbapply::pblapply(2:length(vcv.phylos), cl = cores, function(i){
+  m.fits <- pblapply_brmsish_int(2:length(vcv.phylos), cl = cores, pbar = pb, function(i){
 
     if (save.fits & !single.fit & !file.exists(file.path(path, fit.name, paste0(fit.name, "-", i, ".rds"))) | !save.fits) {
       up_fit <- stats::update(m.fit,

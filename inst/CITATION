@@ -2,11 +2,11 @@ citHeader("Please cite 'brmsish' as follows:")
 
 
 citEntry(entry = "MISC",
-        title = "brmsish: random stuff on brms bayesian models",
+        title = "brmsish: Miscellaneous functions to further customize brms bayesian regression models",
         author = personList(as.person("M. Araya-Salas")),
         year = "2022",
 #        journal = "Methods in Ecology and Evolution",
 #        url = "http://dx.doi.org/10.1111/2041-210X.12624",
-        textVersion = "Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0."
+        textVersion = "Araya-Salas (2022), brmsish: Miscellaneous functions to further customize brms bayesian regression models. R package version 1.0.0."
 
 )
