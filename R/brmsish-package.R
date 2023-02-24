@@ -16,7 +16,11 @@
 #' @import cowplot
 #' @import ggdist
 #' @import posterior
+#' @import brms
 #' @importFrom methods is
+#' @importFrom viridis viridis
+#' @importFrom stats as.formula median
+#' @importFrom utils stack
 #' @author Marcelo Araya-Salas
 #'
 #' Maintainer: Marcelo Araya-Salas (\email{marcelo.araya@@ucr.ac.cr})

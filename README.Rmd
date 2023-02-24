@@ -23,10 +23,10 @@ knitr::opts_chunk$set(
 ```
 
 
-A poorly documented package with a few random, tangentially related functions to visualize and/or modify [brms](https://paul-buerkner.github.io/brms/index.html) models. So far the package has functions for:
+This package has a few tangentially related functions to visualize and/or modify [brms](https://paul-buerkner.github.io/brms/index.html) models. It's a collection of functions I have been accumulating as I use [brms](https://paul-buerkner.github.io/brms/index.html) for my statistical analyses. So far the package has functions for:
 
 - Running multiple comparisons (e.g. contrasts) between levels of a categorical variable
-- Plotting posterior distributions and diagnostics plots in a Rmarkdown friendly format
+- Plotting posterior distributions, trace plots and diagnostics plots in a Rmarkdown friendly format
 - Running models on a population of phylogenetic trees to account for phylogenetic uncertainty
 - Combining a bunch of models saved as RDS files
 
@@ -51,9 +51,9 @@ Araya-Salas (2022), *brmsish: random stuff on brms bayesian models*. R package v
 
 # References
 
-1. Bürkner, P. C. (2017). brms: An R package for Bayesian multilevel models using Stan. Journal of statistical software, 80, 1-28.
+1. Buerkner, P. C. (2017). brms: An R package for Bayesian multilevel models using Stan. Journal of statistical software, 80, 1-28.
 
-1. Bürkner, P. C. (2017). Advanced Bayesian multilevel modeling with the R package brms. arXiv preprint arXiv:1705.11123.
+1. Buerkner, P. C. (2017). Advanced Bayesian multilevel modeling with the R package brms. arXiv preprint arXiv:1705.11123.
 
-1. Nalborczyk, L., Batailler, C., Lœvenbruck, H., Vilain, A., & Bürkner, P. C. (2019). An introduction to Bayesian multilevel models using brms: A case study of gender effects on vowel variability in standard Indonesian. Journal of Speech, Language, and Hearing Research, 62(5), 1225-1242.
+1. Nalborczyk, L., Batailler, C., Lœvenbruck, H., Vilain, A., & Buerkner, P. C. (2019). An introduction to Bayesian multilevel models using brms: A case study of gender effects on vowel variability in standard Indonesian. Journal of Speech, Language, and Hearing Research, 62(5), 1225-1242.
 

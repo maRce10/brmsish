@@ -82,8 +82,8 @@ pblapply_brmsish_int <- function(X, FUN, cl = 1, pbar = TRUE, ...) {
   rval
 }
 
-# prints tables with model diagnostics in html format
-html_format_model_table <- function(x){
+# prints tables with fit diagnostics in html format
+html_format_fit_table <- function(x){
 
   x$diverg_transitions <-
     ifelse(
@@ -144,7 +144,7 @@ html_format_model_table <- function(x){
 
 }
 
-# prints tables with model coefficients and additional
+# prints tables with fit coefficients and additional
 html_format_coef_table <- function(x, fill, highlight){
 
   if (!is.null(x$Rhat)){
@@ -191,7 +191,7 @@ html_format_coef_table <- function(x, fill, highlight){
     )
 }
 
-## helper modified from brms to get model summary from draws object
+## helper modified from brms to get fit summary from draws object
 draw_summary <- function(draws, variables, probs, robust) {
 
   .quantile <- function(x, ...) {

@@ -51,14 +51,14 @@ package version 1.0.0.
 
 # References
 
-1.  Bürkner, P. C. (2017). brms: An R package for Bayesian multilevel
+1.  Buerkner, P. C. (2017). brms: An R package for Bayesian multilevel
     models using Stan. Journal of statistical software, 80, 1-28.
 
-2.  Bürkner, P. C. (2017). Advanced Bayesian multilevel modeling with
+2.  Buerkner, P. C. (2017). Advanced Bayesian multilevel modeling with
     the R package brms. arXiv preprint arXiv:1705.11123.
 
 3.  Nalborczyk, L., Batailler, C., Lœvenbruck, H., Vilain, A., &
-    Bürkner, P. C. (2019). An introduction to Bayesian multilevel models
+    Buerkner, P. C. (2019). An introduction to Bayesian multilevel models
     using brms: A case study of gender effects on vowel variability in
     standard Indonesian. Journal of Speech, Language, and Hearing
     Research, 62(5), 1225-1242.

@@ -1,15 +1,66 @@
-# prints a summary of brm model results. It includes a model table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files.
+#' @title Print a summary of brmsfit results
+#'
+#' @description \code{fit_summary} prints a summary of brmsfit results.
+#' @usage fit_summary(fit = NULL, gsub.pattern = NULL,
+#' gsub.replacement = NULL,xlab = "Effect size", n.posterior = 2000,
+#' fit.name = NULL, read.file = NULL, plot.area.prop = 1,
+#' remove.intercepts = FALSE, fill = "#6DCD59FF",
+#' trace.palette = viridis::viridis, effects = NULL, save = FALSE,
+#' dest.path = ".", overwrite = FALSE, robust = FALSE,
+#' width = 8, height = "dynamic", highlight = FALSE,
+#' print.name = TRUE)
+#' @param fit A brmsfit object.
+#' @param gsub.pattern A vector with character strings to be replaced
+#' @param gsub.replacement A vector with character strings to use for replacement.
+#' @param xlab A character string with the horizontal axis label. Default is "Effect size".
+#' @param n.posterior Number of posterior samples to use for plotting. Default is 2000.
+#' @param fit.name Character string to be added as title. If not supplied and 'read.file' is supplied the name is obtained from the file.
+#' @param read.file Character string with the name of a RDS file to be read, if supplied 'fit' is ignored.
+#' @param read.file Character string with the name of the .rds file containing the model fit.
+#' @param plot.area.prop Positive number to control de proportion of the plotting area of posterior distributions that will be included. Default is 1 (the default area included by \code{\link[ggplot2]{ggplot}}). Useful for adding or removing empty space around distributions.
+#' @param remove.intercepts Logical to control if intercepts are included in the output.
+#' @param fill Color for posterior distribution fill. Default is "#6DCD59FF".
+#' @param trace.palette Color palette function for trace plotting. Default is \code{\link[viridis]{viridis}}.
+#' @param effects Character vector with the name of the effects (e.g. predictor variables) to be included. Optional.
+#' @param save Logical to control if the summary is saved instead of printed. If TRUE a RDS file with the function output (a list) and a jpeg file is saved into 'dest.path'.
+#' @param dest.path Directory in which to save results (if \code{save = TRUE}). The current working directory is used as default.
+#' @param overwrite Logical to control if saved results are overwritten. Defaul is FALSE.
+#' @param robust Logical to control the type of central tendency measure as in \code{\link[brms]{summary.brmsfit}}).
+#' @param width Width of posterior distribution + trace plots as in \code{\link[ggplot2]{ggsave}}). Default is 8 (in).
+#' @param height Height of posterior distribution + trace plots as in \code{\link[ggplot2]{ggsave}}). Default is 'dynamic' which means that the height will increase as more panels (predictors) are added.
+#' @param highlight Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.
+#' @param print.name Logical to control if the name of the model fit is printed (when \code{plot = TRUE}).
+#' @return If \code{plot = TRUE} the function returns a model fit table, a coefficient table and a posterior distribution halfeye graph. If \code{save = TRUE} this objects are saved as a RDS file along with jpeg file.
+#' @export
+#' @name fit_summary
+#' @details It prints a summary of brmsfit results. It includes a model fit table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files. You might have to add 'results = 'as.is', warning = FALSE and adjust fig.width to chunk options in Rmarkdown documents.
+#' @examples
+#' {
+#' # run model
+#' md1 <- brm(Petal.Length ~ Petal.Width + Species, iris, chains = 1,
+#' iter = 500, file = file.path(tempdir(), "md1"))
+#'
+#' # print summary
+#' fit_summary(read.file = file.path(tempdir(), "md1.rds"))
+#' }
+#' @seealso \code{\link{combine_rds_fits}}
+#' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
+#'
+#' @references {
+#' Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+#'
+#' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
+#' }
 
-# remember to add 'results = 'as.is' and warning = FALSE to chunk options and adjust fig.width
-html_summary <-
-  function(model = NULL,
-           gsub.pattern = NULL, # a vector with character strings to be replaced
-           gsub.replacement = NULL,  # a vector with character strings to use for replacement
+fit_summary <-
+  function(fit = NULL,
+           gsub.pattern = NULL,
+           gsub.replacement = NULL,
            xlab = "Effect size",
-           n.posterior = 2000, # number of posterior samples to use for plotting
-           model.name = NULL, # for adding it as a title
-           read.file = NULL, # name of file to be read, if supplied 'model' is ignored
-           plot.area.prop = 1, # proportion of the total effect size range (given by the minimum and maximum of all posterior samples) to plot (sort of xlim)
+           n.posterior = 2000,
+           fit.name = NULL,
+           read.file = NULL,
+           plot.area.prop = 1,
            remove.intercepts = FALSE,
            fill = "#6DCD59FF",
            trace.palette = viridis::viridis,
@@ -25,30 +76,32 @@ html_summary <-
            ) {
 
      # object for avoiding errors with ggplot functions when checking package
-    significance <-
+      `l-95% CI` <-
+      `u-95% CI` <-
+      significance <-
       value <-
       variable <-
       CI_high <-
       CI_low <-
       Hypothesis <- Parameter <- chain <- iteration <- NULL
 
-    if (is.null(model) & is.null(read.file))
-      stop("either 'model' or 'read.file' must be supplied")
+    if (is.null(fit) & is.null(read.file))
+      stop("either 'fit' or 'read.file' must be supplied")
 
-    if (!is.null(model) & is.null(model.name))
-      model.name <- deparse(substitute(model)) else
-        if (!is.null(read.file) & is.null(model.name))
-          model.name <- gsub("\\.rds$", "", basename(read.file), ignore.case = TRUE)
+    if (!is.null(fit) & is.null(fit.name))
+      fit.name <- deparse(substitute(fit)) else
+        if (!is.null(read.file) & is.null(fit.name))
+          fit.name <- gsub("\\.rds$", "", basename(read.file), ignore.case = TRUE)
 
     # skip everything if save TRUE and folder exists
-    if (!dir.exists(file.path(dest.path, model.name)) & save | !save | save & overwrite){
+    if (!dir.exists(file.path(dest.path, fit.name)) & save | !save | save & overwrite){
 
-    if (is.null(model) & !is.null(read.file))
-      model <- readRDS(read.file)
-    variables <- posterior::variables(model)
+    if (is.null(fit) & !is.null(read.file))
+      fit <- readRDS(read.file)
+    variables <- posterior::variables(fit)
     incl_classes <- c(
       "b", "bs", "bcs", "bsp", "bmo", "bme", "bmi", "bm",
-      brms:::valid_dpars(model), "delta", "lncor", "rescor", "ar", "ma", "sderr",
+      brms:::valid_dpars(fit), "delta", "lncor", "rescor", "ar", "ma", "sderr",
       "cosy", "cortime", "lagsar", "errorsar", "car", "sdcar", "rhocar",
       "sd", "cor", "df", "sds", "sdgp", "lscale", "simo"
     )
@@ -60,21 +113,21 @@ html_summary <-
     if (remove.intercepts)
       betas <- grep("b_Intercept", betas, value = TRUE, invert = TRUE)
 
-    iterations <- model$fit@sim$iter
-    chains <- posterior::nchains(model)
-    warmup <- model$fit@sim$warmup
-    mod_formula <- as.character(model$formula[1])
-    diverg_transitions <- sum(brms::nuts_params(model, pars = "divergent__")$Value)
-    priors <- paste(apply(brms::prior_summary(model, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
-    seed <- model$fit@stan_args[[1]]$seed
-    thinning <- model$fit@stan_args[[1]]$thin
+    iterations <- fit$fit@sim$iter
+    chains <- posterior::nchains(fit)
+    warmup <- fit$fit@sim$warmup
+    mod_formula <- as.character(fit$formula[1])
+    diverg_transitions <- sum(brms::nuts_params(fit, pars = "divergent__")$Value)
+    priors <- paste(apply(brms::prior_summary(fit, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
+    seed <- fit$fit@stan_args[[1]]$seed
+    thinning <- fit$fit@stan_args[[1]]$thin
 
-    # replace model with draws (to avoid having several huge objects)
-    model <- posterior::as_draws_array(model, variable = betas)
+    # replace fit with draws (to avoid having several huge objects)
+    fit <- posterior::as_draws_array(fit, variable = betas)
 
-    coef_table <- draw_summary(model, variables = betas, probs = c(0.025, 0.975), robust = robust)
+    coef_table <- draw_summary(fit, variables = betas, probs = c(0.025, 0.975), robust = robust)
 
-    model_table <-
+    fit_table <-
       data.frame(
         priors = priors,
         formula = mod_formula,
@@ -90,35 +143,35 @@ html_summary <-
       )
 
     # thin before getting chain data for trace plot
-    if (round(model_table$iterations / n.posterior, 0) >= 2)
-      model <-
-      posterior::thin_draws(model, model_table$iterations / n.posterior, 0)
+    if (round(fit_table$iterations / n.posterior, 0) >= 2)
+      fit <-
+      posterior::thin_draws(fit, fit_table$iterations / n.posterior, 0)
 
     # data by chain for trace plot
     posteriors_by_chain <- do.call(rbind, lapply(betas, function(x) {
 
-      X <- as.data.frame(model[,, x])
+      X <- as.data.frame(fit[,, x])
       names(X) <- paste("chain", 1:ncol(X))
       X <- stack(X)
       X$variable <- x
       X$iteration <-
-        round(seq(1, model_table$iterations, length.out = nrow(X) / model_table$chains))
+        round(seq(1, fit_table$iterations, length.out = nrow(X) / fit_table$chains))
       names(X) <- c("value", "chain", "variable", "iteration")
       return(X)
     }))
 
     # merge chains
-    model <- as.data.frame(posterior::merge_chains(model))
-    names(model) <- betas
+    fit <- as.data.frame(posterior::merge_chains(fit))
+    names(fit) <- betas
 
-    model <- do.call(rbind, lapply(betas, function(y)
+    fit <- do.call(rbind, lapply(betas, function(y)
       data.frame(
         variable = y,
-        value = sort(model[, colnames(model) == y], decreasing = FALSE)
+        value = sort(fit[, colnames(fit) == y], decreasing = FALSE)
       )))
 
-    model$variable <-
-      factor(model$variable, levels = sort(unique(model$variable)))
+    fit$variable <-
+      factor(fit$variable, levels = sort(unique(fit$variable)))
 
     coef_table2 <- coef_table
     coef_table2$variable <-
@@ -139,10 +192,10 @@ html_summary <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
                posteriors_by_chain$variable)
-        model$variable <-
+        fit$variable <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
-               model$variable)
+               fit$variable)
         coef_table2$variable <-
           gsub(pattern = gsub.pattern[i],
                replacement = gsub.replacement[i],
@@ -182,20 +235,20 @@ else col_pointrange <- rep("black", nrow(coef_table2))
     if (!highlight)
       fill_values <- rep(grDevices::adjustcolor(fill, alpha.f = 0.5), length(fill_values))
 
-    model$significance <-
-      sapply(model$variable, function(x)
+    fit$significance <-
+      sapply(fit$variable, function(x)
         coef_table2$significance[as.character(coef_table2$variable) == x])
 
     # choose effects to display
     if (!is.null(effects)){
-      model <- model[grep(paste(effects, collapse = "|"), model$variable), ]
+      fit <- fit[grep(paste(effects, collapse = "|"), fit$variable), ]
       coef_table <- coef_table[grep(paste(effects, collapse = "|"), rownames(coef_table)), ]
       coef_table2 <- coef_table2[grep(paste(effects, collapse = "|"), coef_table2$variable), ]
       posteriors_by_chain <- posteriors_by_chain[grep(paste(effects, collapse = "|"), posteriors_by_chain$variable), ]
     }
 
     # order effects as in table
-      model$variable <- factor(model$variable, levels = coef_table2$variable)
+      fit$variable <- factor(fit$variable, levels = coef_table2$variable)
 
     # trick for getting own palette in ggplot2
       scale_color_discrete <- function(...) ggplot2::scale_color_manual(..., values= trace.palette(length(unique(posteriors_by_chain$chain))))
@@ -204,7 +257,7 @@ else col_pointrange <- rep("black", nrow(coef_table2))
 
     # creat plots
     gg_distributions <-
-      ggplot2::ggplot(data = model, ggplot2::aes(y = variable, x = value, fill = significance)) +
+      ggplot2::ggplot(data = fit, ggplot2::aes(y = variable, x = value, fill = significance)) +
       ggplot2::geom_vline(xintercept = 0,
                           col = "black",
                           lty = 2) +
@@ -265,32 +318,30 @@ if (plot.area.prop != 1)
 
     if (save){
 
-      dir.create(file.path(dest.path, model.name))
+      dir.create(file.path(dest.path, fit.name))
 
 
       if (height == "dynamic")
         height <- 3 + 0.4 * length(betas)
       if (height > 49) height <- 49
 
-      cowplot::ggsave2(filename = file.path(dest.path, model.name, "plot.jpeg"), plot = gg, width = width, height = height)
-    }
+      cowplot::ggsave2(filename = file.path(dest.path, fit.name, "plot.jpeg"), plot = gg, width = width, height = height)
 
-    # save output
-    if (save)
-      saveRDS(object = list(model_table = model_table, coef_table = coef_table, graph = gg), file.path(dest.path, model.name, "model_table.RDS")) else {
+      saveRDS(object = list(fit_table = fit_table, coef_table = coef_table, graph = gg), file.path(dest.path, fit.name, "fit_table.RDS"))
+      } else {
 
       if (print.name)
-        cat('\n\n## ', model.name, '\n\n')
+        cat('\n\n## ', fit.name, '\n\n')
 
-        # print model summary table
-        model_table <- html_format_model_table(model_table)
+        # print fit summary table
+        fit_table <- html_format_fit_table(fit_table)
 
-        print(model_table)
+        print(fit_table)
 
         # print estimates
         coef_table <- html_format_coef_table(coef_table, fill = fill,  highlight = highlight)
 
-        # print model result table
+        # print fit result table
         print(coef_table)
 
          print(gg)

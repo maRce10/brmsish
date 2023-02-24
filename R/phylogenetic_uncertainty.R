@@ -1,14 +1,45 @@
-# formula must not include the random effect for species
-# the function will read models where it stop last time
-# save.models save individual (single tree) models (not the combined one)
-# if save.models false then single model = TRUE
-phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores = 1, iter = 5000, model.name, thin = 0, save.models = FALSE, save.combined = FALSE, single.model = FALSE, path = "./", ...){
+#' @title Run a brms regression model across a population of phylogenetic trees
+#'
+#' @description \code{phylogenetic_uncertainty} runs a brms regression model across a population of phylogenetic trees.
+#' @usage phylogenetic_uncertainty(formula, data, phylos, sp.id.column, cores = 1,
+#' iter = 5000, fit.name, thin = 0, save.fits = FALSE,
+#' save.combined = FALSE, path = "./", ...)
+#' @param formula A model formula. It must not include the random effect term referring to the phylogeny.
+#' @param data A data frame containing the data to be used in the model.
+#' @param phylos An object of class 'multiPhylo' (see  \code{\link[ape]{multiphylo}}).
+#' @param sp.id.column The name of the column containing the 'taxa' label (i.e. the labels that match those in the tree tips).
+#' @param cores Number of cores to use for parallelization. Default is 1 (no parallelization).
+#' @param iter Integer with the number of the iterations as in \code{\link[brms]{brm}}.
+#' @param fit.name Character string with the name of a RDS file to be saved.
+#' @param thin Integer with the thinning rate as in \code{\link[brms]{brm}}.
+#' @param save.fits Logical to control if single fits are saved as RDS files. Default is FALSE. If 'save.combined' is also FALSE then the model fit is returned into the R environment.
+#' @param save.combined Logical to control if the combined single fit is saved as a RDS file. Default is FALSE. If 'save.fits' is also FALSE then the model fit is returned into the R environment.
+#' @param path Character string with the directory path in which to save model fit(s) (when either 'save.combined' or 'save.fits' are TRUE). The current working directory is used as default.
+#' @param ... Additional arguments to be passed to \code{\link[brms]{brm}} for further customizing models.
+#' @return The function returns a fit model that combines all submodels with individual phylogenies. Individual submodels can be saved if \code{save.fits = TRUE}.
+#' @export
+#' @name phylogenetic_uncertainty
+#' @details The function allows to take into account phylogenetic uncertainty when running phylogenetically informed regressions by running several models with a population of trees (ideally the highest posterior trees). Individual models are then combined into a single model fit.
+#' @examples
+#' {
+#' }
+#' @seealso \code{\link{fit_summary}}, \code{\link{combine_rds_fits}}
+#' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
+#'
+#' @references {
+#' Araya-Salas (2022), brmsish: random stuff on brms bayesian models. R package version 1.0.0.
+#'
+#' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
+#' }
 
-  if (!save.models)
-    single.model <- TRUE
 
-  if (single.model & save.combined & file.exists(file.path(path, paste0(model.name, ".rds"))))
-    cat(file.path(path, paste0(model.name, ".rds")), "file already exists") else {
+phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores = 1, iter = 5000, fit.name, thin = 0, save.fits = FALSE, save.combined = FALSE, path = "./", ...){
+
+  if (!save.fits)
+    single.fit <- TRUE else single.fit <- FALSE
+
+  if (single.fit & save.combined & file.exists(file.path(path, paste0(fit.name, ".rds"))))
+    cat(file.path(path, paste0(fit.name, ".rds")), "file already exists") else {
 
   vcv.phylos <- lapply(phylos, ape::vcv.phylo)
 
@@ -19,18 +50,18 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
   formula <- paste0(formula, " + (1|gr(", sp.id.column, ", cov = vcv.phylo))")
 
   # back to formula format
-  formula <- as.formula(formula)
+  formula <- stats::as.formula(formula)
 
-  if (save.models & !dir.exists(file.path(path, model.name)))
-    dir.create(file.path(path, model.name))
+  if (save.fits & !dir.exists(file.path(path, fit.name)))
+    dir.create(file.path(path, fit.name))
 
-  # fit preliminary model
-  print("fit or read base model (fitted on the first tree)")
+  # fit preliminary fit
+  print("fit or read base fit (fitted on the first tree)")
 
-  if (save.models) {
-    models <- list.files(path = file.path(path, model.name), pattern = model.name, full.names = TRUE)
-    if (length(models) > 0)
-      m.fit <- readRDS(models[1]) else{
+  if (save.fits) {
+    fits <- list.files(path = file.path(path, fit.name), pattern = fit.name, full.names = TRUE)
+    if (length(fits) > 0)
+      m.fit <- readRDS(fits[1]) else{
         m.fit <- brm(
           formula = formula,
           data = data,
@@ -41,8 +72,8 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
           ...
         )
 
-        if (!single.model)
-          saveRDS(object = m.fit, file = file.path(path, model.name, paste0(model.name, "-1.rds")))
+        if (!single.fit)
+          saveRDS(object = m.fit, file = file.path(path, fit.name, paste0(fit.name, "-1.rds")))
       }
   } else
     m.fit <- brm(
@@ -56,30 +87,30 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
     )
 
 
-  # Loop Model
+  # Loop fit
   print("loop over trees")
   m.fits <- pbapply::pblapply(2:length(vcv.phylos), cl = cores, function(i){
 
-    if (save.models & !single.model & !file.exists(file.path(path, model.name, paste0(model.name, "-", i, ".rds"))) | !save.models) {
+    if (save.fits & !single.fit & !file.exists(file.path(path, fit.name, paste0(fit.name, "-", i, ".rds"))) | !save.fits) {
       up_fit <- stats::update(m.fit,
                        data2 = list(vcv.phylo = vcv.phylos[[i]], iter = iter, thin = thin))
 
-      if (save.models & !single.model){
-        saveRDS(object = up_fit, file = file.path(path, model.name, paste0(model.name, "-", i, ".rds")))
+      if (save.fits & !single.fit){
+        saveRDS(object = up_fit, file = file.path(path, fit.name, paste0(fit.name, "-", i, ".rds")))
 
         return(NULL)
       } else return(up_fit)
     }
   })
 
-  # add first model
+  # add first fit
   m.fits[[length(m.fits) + 1]] <- m.fit
 
-  if (single.model){
+  if (single.fit){
     no.brmsfit <- which(sapply(m.fits, class) != "brmsfit")
 
     while(any(sapply(m.fits, class) != "brmsfit")){
-      print("fixing failed models")
+      print("fixing failed fits")
       m.fits[no.brmsfit] <- pbapply::pblapply(no.brmsfit, cl = cores, function(i){
 
         upd.fit <- if (!methods::is(m.fits[[i]], "brmsfit"))
@@ -95,7 +126,7 @@ phylogenetic_uncertainty <- function(formula, data, phylos, sp.id.column, cores 
     m.fits_comb <- combine_models(mlist = m.fits)
 
     if (save.combined)
-      saveRDS(m.fits_comb, file.path(path, paste0(model.name, ".rds")))
+      saveRDS(m.fits_comb, file.path(path, paste0(fit.name, ".rds")))
   } else
     m.fits_comb <- NULL
     return(m.fits_comb)
