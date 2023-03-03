@@ -149,7 +149,9 @@
 <span class="r-in"><span>header <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># run model</span></span></span>
-<span class="r-in"><span><span class="va">pu_mod</span> <span class="op">&lt;-</span> <span class="fu">phylogenetic_uncertainty</span><span class="op">(</span><span class="va">phen</span> <span class="op">~</span> <span class="va">cofactor</span>,                                data <span class="op">=</span> <span class="va">data_simple</span>, sp.id.column <span class="op">=</span> <span class="st">"phylo"</span>, phylos <span class="op">=</span> <span class="va">phylos</span>,</span></span>
+<span class="r-in"><span><span class="va">pu_mod</span> <span class="op">&lt;-</span> <span class="fu">phylogenetic_uncertainty</span><span class="op">(</span><span class="va">phen</span> <span class="op">~</span> <span class="va">cofactor</span>,</span></span>
+<span class="r-in"><span>data <span class="op">=</span> <span class="va">data_simple</span>, sp.id.column <span class="op">=</span> <span class="st">"phylo"</span>,</span></span>
+<span class="r-in"><span>phylos <span class="op">=</span> <span class="va">phylos</span>,</span></span>
 <span class="r-in"><span> iter <span class="op">=</span> <span class="fl">3000</span>, save.fits <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
 <span class="r-in"><span> save.combined <span class="op">=</span> <span class="cn">FALSE</span>, chains <span class="op">=</span> <span class="fl">1</span>,</span></span>
 <span class="r-in"><span> prior <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
