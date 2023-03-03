@@ -57,7 +57,9 @@ data_simple <- read.table("https://paul-buerkner.github.io/data/data_simple.txt"
 header = TRUE)
 
 # run model
-pu_mod <- phylogenetic_uncertainty(phen ~ cofactor,                                data = data_simple, sp.id.column = "phylo", phylos = phylos,
+pu_mod <- phylogenetic_uncertainty(phen ~ cofactor,
+data = data_simple, sp.id.column = "phylo",
+phylos = phylos,
  iter = 3000, save.fits = FALSE,
  save.combined = FALSE, chains = 1,
  prior = c(

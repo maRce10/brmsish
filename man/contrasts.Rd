@@ -2,17 +2,18 @@
 % Please edit documentation in R/contrasts.R
 \name{contrasts}
 \alias{contrasts}
-\title{Estimate hypothesis testing for all pairwise comparisons}
+\title{Estimate hypothesis testing for all pairwise comparisons of categorical predictor levels}
 \usage{
 contrasts(fit = NULL, predictor, level.sep = " - ", xlab = "Effect size",
 gsub.pattern = NULL, gsub.replacement = NULL, n.posterior = 2000,
 fill = "#6DCD59FF", sort.levels = NULL, html.table  = FALSE,
-read.file = NULL, plot = FALSE, plot.area.prop = 1, highlight = FALSE)
+read.file = NULL, plot = FALSE, plot.area.prop = 1, highlight = FALSE,
+non.zero = FALSE)
 }
 \arguments{
 \item{fit}{A brmsfit object.}
 
-\item{predictor}{The name of the categorical predictor in the model fit for which contrasts will be computed.}
+\item{predictor}{The name of the categorical predictor in the model fit for which contrasts will be computed. Note that the predictor must have at least 3 levels.}
 
 \item{level.sep}{A character string to separate the levels in the output.}
 
@@ -28,7 +29,7 @@ read.file = NULL, plot = FALSE, plot.area.prop = 1, highlight = FALSE)
 
 \item{sort.levels}{Character vector with the order to be used for levels in the predictor.}
 
-\item{html.table}{Logical to control whether estimate tables are plotted in html format. Useful for creating Rmd or quarto html reports. Is FALSE (default) the table is return as a data frame object.}
+\item{html.table}{Logical to control whether estimate tables are plotted in html format. Useful for creating dynamic reports (i.e. Rmd or quarto html reports). Is FALSE (default) the table is return as a data frame object. You might have to add 'results = 'as.is' to chunk options in dynamic reports.}
 
 \item{read.file}{Character string with the name of the .rds file containing the model fit.}
 
@@ -37,15 +38,19 @@ read.file = NULL, plot = FALSE, plot.area.prop = 1, highlight = FALSE)
 \item{plot.area.prop}{Positive number to control de proportion of the plotting area of posterior distributions that will be included. Default is 1 (the default area included by \code{\link[ggplot2]{ggplot}}). Useful for adding or removing empty space around distributions.}
 
 \item{highlight}{Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.}
+
+\item{non.zero}{Logical to determine if predictor level is compared against zero instead. Default is FALSE.}
 }
 \value{
 If \code{plot = TRUE} the function returns a ggplot object with the posterior distributions of the comparisons between predictor levels. If \code{html = FALSE} the function will return a data frame with estimates for each comparison, otherwise it will print the estimates in a table in html format.
 }
 \description{
-\code{contrasts} estimates hypothesis testing for all pairwise comparisons of a predictor in brmsfit object.
+\code{contrasts} estimates hypothesis testing for all pairwise comparisons of the levels of a categorical in a brmsfit object.
 }
 \details{
-Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function \code{\link[brms]{hypothesis}} is used internally.
+Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function \code{\link[brms]{hypothesis}} is used internally. Alternatively, if argument \code{non.zero = TRUE} the function evaluates whether each level of the predictor is different from zero.
+
+Note that comparisons (i.e. contrasts) of categorical predictor levels when additional predictors are also included in the model are computed at the baseline (categorical predictors) or 0 (continuous predictors) value of the additional predictors. Mean-centering on additional continuous predictors can be used to ensure that the mean value of continuous predictors is used as baseline instead (Schielzeth 2010).
 }
 \examples{
 {
@@ -63,6 +68,8 @@ contrasts(fit = mod, predictor = "Species", html.table = TRUE, plot = FALSE)
 Araya-Salas (2022), brmsish: miscellaneous functions to customize brms bayesian regression models. R package version 1.0.0.
 
 Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
+
+Schielzeth, H. (2010), Simple means to improve the interpretability of regression coefficients. Methods in Ecology and Evolution, 1: 103-113. https://doi.org/10.1111/j.2041-210X.2010.00012.x
 }
 }
 \seealso{

@@ -33,7 +33,7 @@
 #' @return If \code{plot = TRUE} the function returns a model fit table, a coefficient table and a posterior distribution halfeye graph. If \code{save = TRUE} this objects are saved as a RDS file along with jpeg file.
 #' @export
 #' @name extended_summary
-#' @details It prints a summary of brmsfit results. It includes a model fit table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files. You might have to add 'results = 'as.is', warning = FALSE and adjust fig.width to chunk options in Rmarkdown documents.
+#' @details It prints a summary of brmsfit results. It includes a model fit table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files. You might have to add 'results = 'as.is' to chunk options in Rmarkdown documents.
 #' @examples
 #' {
 #' # run model

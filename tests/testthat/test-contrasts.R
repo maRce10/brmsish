@@ -6,4 +6,4 @@ test_that("basic", {
   a <- contrasts(fit = mod, predictor = "Species", html.table = FALSE, plot = TRUE)
 
   expect_true(nrow(a) == 3)
-})
+})~

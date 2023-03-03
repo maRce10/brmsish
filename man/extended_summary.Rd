@@ -61,7 +61,7 @@ If \code{plot = TRUE} the function returns a model fit table, a coefficient tabl
 \code{extended_summary} prints a summary of brmsfit results.
 }
 \details{
-It prints a summary of brmsfit results. It includes a model fit table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files. You might have to add 'results = 'as.is', warning = FALSE and adjust fig.width to chunk options in Rmarkdown documents.
+It prints a summary of brmsfit results. It includes a model fit table, a coefficient table and a posterior distribution halfeye graph next to a chain trace plot. Tables are produce in html format so the output is nicely printed when knit in Rmarkdown files. You might have to add 'results = 'as.is' to chunk options in Rmarkdown documents.
 }
 \examples{
 {
