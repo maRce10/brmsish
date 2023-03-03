@@ -39,7 +39,7 @@ non.zero = FALSE)
 
 \item{highlight}{Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.}
 
-\item{non.zero}{Logical to determine if predictor level is compared against zero instead. Default is FALSE.}
+\item{non.zero}{Logical to determine if the predictor levels are compared against zero instead. Default is FALSE.}
 }
 \value{
 If \code{plot = TRUE} the function returns a ggplot object with the posterior distributions of the comparisons between predictor levels. If \code{html = FALSE} the function will return a data frame with estimates for each comparison, otherwise it will print the estimates in a table in html format.

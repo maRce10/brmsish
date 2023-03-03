@@ -20,7 +20,7 @@
 #' @param plot Logical to control if posterior distributions of estimates are plotted. Default is FALSE.
 #' @param plot.area.prop Positive number to control de proportion of the plotting area of posterior distributions that will be included. Default is 1 (the default area included by \code{\link[ggplot2]{ggplot}}). Useful for adding or removing empty space around distributions.
 #' @param highlight Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.
-#' @param non.zero Logical to determine if predictor level is compared against zero instead. Default is FALSE.
+#' @param non.zero Logical to determine if the predictor levels are compared against zero instead. Default is FALSE.
 #' @return If \code{plot = TRUE} the function returns a ggplot object with the posterior distributions of the comparisons between predictor levels. If \code{html = FALSE} the function will return a data frame with estimates for each comparison, otherwise it will print the estimates in a table in html format.
 #'
 #' @export
