@@ -100,7 +100,7 @@ contrasts <-
       gsub(" |&", "", paste0(predictor, unique(fit$data[, predictor])))
     base_level <- setdiff(original_levels, fit_levels)
 
-    if(length(original_levels) < 3)
+    if(length(original_levels) < 3 & !non.zero)
       stop2("The predictor must have at least 3 levels")
 
     # get levels
@@ -114,7 +114,9 @@ contrasts <-
     pred_levels <- paste0(predictor, pred_levels)
 
     # create data frame with level pairs
-    levels_df <- as.data.frame(t(utils::combn(pred_levels, 2)))
+    if (!non.zero)
+     levels_df <- as.data.frame(t(utils::combn(pred_levels, 2))) else
+       levels_df <- data.frame(V1 = pred_levels, V2 = "")
 
     # remove spaces and &
     levels_df$V1.nospace <- gsub(" |&", "", levels_df$V1)
@@ -162,7 +164,6 @@ contrasts <-
                           "Est.Error",
                           "CI.Lower",
                           "CI.Upper")]
-
 
     hyp_table$Estimate <- hyp_table$Estimate * levels_df$sign
     hyp_table$`l-95% CI` <- hyp_table$CI.Lower * levels_df$sign
@@ -274,11 +275,10 @@ contrasts <-
         color = "transparent"
       ) +
       ggplot2::scale_fill_manual(values = fill_values, guide = 'none')  +
-      ggplot2::geom_point(data = hyp_table) +
+      ggplot2::geom_point(data = hyp_table, col = col_pointrange) +
       ggplot2::geom_errorbar(data = hyp_table,
                              ggplot2::aes(xmin = CI_low, xmax = CI_high),
-                             width = 0) +
-      # ggplot2::scale_color_manual(values = col_pointrange) +
+                             width = 0, col = col_pointrange) +
       ggplot2::theme_classic() +
       ggplot2::theme(
         axis.ticks.length = ggplot2::unit(0, "pt"),

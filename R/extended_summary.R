@@ -216,7 +216,7 @@ posteriors_by_chain$variable <-
 
 # define colors for point range in distribution plot
 if (highlight)
-col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black")
+ col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black")
 else col_pointrange <- rep("black", nrow(coef_table2))
 
     # define color for posterior distribution
