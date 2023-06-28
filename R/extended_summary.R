@@ -21,7 +21,7 @@
 #' @param remove.intercepts Logical to control if intercepts are included in the output.
 #' @param fill Color for posterior distribution fill. Default is "#6DCD59FF".
 #' @param trace.palette Color palette function for trace plotting. Default is \code{\link[viridis]{viridis}}.
-#' @param effects Character vector with the name of the effects (e.g. predictor variables) to be included. Optional.
+#' @param effects Character vector with the name of the effects (e.g. predictor variables) to be included. Optional. Note that if effect names have been modified using 'gsub.pattern' and 'gsub.replacement' the modified names should be used instead. Effects in plots and tables will also be sorted as in 'effects' so this can be used to customize order.
 #' @param save Logical to control if the summary is saved instead of printed. If TRUE a RDS file with the function output (a list) and a jpeg file is saved into 'dest.path'.
 #' @param dest.path Directory in which to save results (if \code{save = TRUE}). The current working directory is used as default.
 #' @param overwrite Logical to control if saved results are overwritten. Defaul is FALSE.
@@ -214,11 +214,6 @@ posteriors_by_chain$variable <-
       factor(posteriors_by_chain$variable,
              levels = sort(unique(posteriors_by_chain$variable), decreasing = TRUE))
 
-# define colors for point range in distribution plot
-if (highlight)
- col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black")
-else col_pointrange <- rep("black", nrow(coef_table2))
-
     # define color for posterior distribution
     # fill_values <- rep(grDevices::adjustcolor(fill, alpha.f = 0.5), nrow(coef_table2))
     #
@@ -244,11 +239,21 @@ else col_pointrange <- rep("black", nrow(coef_table2))
 
     # choose effects to display
     if (!is.null(effects)){
-      fit <- fit[grep(paste(effects, collapse = "|"), fit$variable), ]
-      coef_table <- coef_table[grep(paste(effects, collapse = "|"), rownames(coef_table)), ]
-      coef_table2 <- coef_table2[grep(paste(effects, collapse = "|"), coef_table2$variable), ]
-      posteriors_by_chain <- posteriors_by_chain[grep(paste(effects, collapse = "|"), posteriors_by_chain$variable), ]
+      fit <- fit[grep(paste0("^", paste(effects, collapse = "$|^"), "$"), fit$variable), ]
+      coef_table <- coef_table[grep(paste0("^", paste(effects, collapse = "$|^"), "$"), rownames(coef_table)), ]
+      coef_table2 <- coef_table2[grep(paste0("^", paste(effects, collapse = "$|^"), "$"), coef_table2$variable), ]
+
+      # order factors for plotting
+      coef_table2 <- coef_table2[match(effects, coef_table2$variable), ]
+      coef_table <- coef_table[match(effects, rownames(coef_table)), ]
+      coef_table2$variable <- factor(coef_table2$variable, levels = effects)
+
+      posteriors_by_chain <- posteriors_by_chain[grep(paste0("^", paste(effects, collapse = "$|^"), "$"), posteriors_by_chain$variable), ]
     }
+
+    # define colors for point range in distribution plot
+    if (highlight)
+      col_pointrange <- ifelse(coef_table2$significance == "non-sig", "gray", "black") else col_pointrange <- rep("black", nrow(coef_table2))
 
     # order effects as in table
       fit$variable <- factor(fit$variable, levels = coef_table2$variable)

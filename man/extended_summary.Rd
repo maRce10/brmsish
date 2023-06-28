@@ -36,7 +36,7 @@ print.name = TRUE)
 
 \item{trace.palette}{Color palette function for trace plotting. Default is \code{\link[viridis]{viridis}}.}
 
-\item{effects}{Character vector with the name of the effects (e.g. predictor variables) to be included. Optional.}
+\item{effects}{Character vector with the name of the effects (e.g. predictor variables) to be included. Optional. Note that if effect names have been modified using 'gsub.pattern' and 'gsub.replacement' the modified names should be used instead. Effects in plots and tables will also be sorted as in 'effects' so this can be used to customize order.}
 
 \item{save}{Logical to control if the summary is saved instead of printed. If TRUE a RDS file with the function output (a list) and a jpeg file is saved into 'dest.path'.}
 

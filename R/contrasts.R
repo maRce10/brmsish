@@ -66,6 +66,13 @@ contrasts <-
            non.zero = FALSE
            ) {
 
+    # format predictor
+    predictor <- gsub(" ", "", predictor)
+
+    # split if interaction
+    if (grepl("*", predictor, fixed = TRUE))
+      predictor <- strsplit(predictor, "*", fixed = TRUE)[[1]]
+
     if (is.null(fit) & is.null(read.file))
       stop("either 'fit' or 'read.file' must be supplied")
 
@@ -79,6 +86,7 @@ contrasts <-
 
     if (is.null(fit) & !is.null(read.file))
       fit <- readRDS(read.file)
+
     if (!brms::is.brmsfit(fit))
       stop("'fit' is not a 'brmsfit' object")
 
@@ -92,30 +100,45 @@ contrasts <-
     incl_regex <- paste0("^", brms:::regex_or(incl_classes), "(_|$|\\[)")
 
     variables <- variables[grepl(incl_regex, variables)]
-    fit_levels <- gsub("^b_", "", variables)
-    fit_levels <- grep(paste0("^Intercept$|", predictor), fit_levels, value = TRUE)
+
+    fit_levels <- grep(paste0("^Intercept$|", paste(predictor, collapse = "|")), gsub("^b_", "", variables)
+, value = TRUE)
 
     # fix  baseline level
     original_levels <-
-      gsub(" |&", "", paste0(predictor, unique(fit$data[, predictor])))
-    base_level <- setdiff(original_levels, fit_levels)
+      unlist(sapply(predictor, function(w) gsub(" |&", "", paste0(w, unique(fit$data[, w])))))
 
-    if(length(original_levels) < 3 & !non.zero)
+    base_levels <- setdiff(original_levels, fit_levels)
+    base_level <- paste(base_levels, collapse = ":")
+
+    if(length(original_levels) < 3 & !non.zero & length(predictor) == 1)
       stop2("The predictor must have at least 3 levels")
 
     # get levels
-    pred_levels <- as.character(unique(fit$data[, predictor]))
-
-    # sort
-    if (!is.null(sort.levels))
-      pred_levels <- pred_levels[match(sort.levels, pred_levels)]
+    pred_levels <- unlist(sapply(predictor, function(w) as.character(unique(fit$data[, w]))))
 
     # add predictor name
-    pred_levels <- paste0(predictor, pred_levels)
+    pred_levels_list <- lapply(predictor, function(w) as.character(unique(fit$data[, w])))
+
+    names(pred_levels_list) <- predictor
+
+    pred_levels <- lapply(seq_len(length(pred_levels_list)), function(x) paste0(names(pred_levels_list)[x], pred_levels_list[[x]]))
+
+    # if (length(pred_levels) > 1)
+    pred_levels <- apply(expand.grid(pred_levels), 1, paste, collapse = ":")
+
+    # sort
+    if (!is.null(sort.levels)){
+      if (length(predictor) == 1)
+        sort.levels <- paste0(predictor, sort.levels)
+      pred_levels <- pred_levels[match(sort.levels, pred_levels)]
+
+      }
+
 
     # create data frame with level pairs
     if (!non.zero)
-     levels_df <- as.data.frame(t(utils::combn(pred_levels, 2))) else
+    levels_df <- as.data.frame(t(utils::combn(pred_levels, 2))) else
        levels_df <- data.frame(V1 = pred_levels, V2 = "")
 
     # remove spaces and &
@@ -132,9 +155,25 @@ contrasts <-
       levels_df$sign[grep(base_level, levels_df$V1)] <- -1
 
     names(contrsts) <- paste0(levels_df$V1, level.sep, levels_df$V2)
+
     contrsts <- gsub(paste0(base_level, " - "), "", contrsts)
     contrsts <- gsub(paste0(" - ", base_level), "", contrsts)
-    names(contrsts) <- gsub(predictor, "", names(contrsts))
+
+
+    if (length(predictor) > 1) {
+      contrsts <- gsub(paste(paste0(base_levels, ":"), collapse = "|"), "", contrsts)
+      contrsts <- gsub(paste(paste0(":", base_levels), collapse = "|"), "", contrsts)
+      contrsts <- gsub(paste(paste0(base_levels, " - "), collapse = "|"), "", contrsts)
+      contrsts <- gsub(paste(paste0(" - ", base_levels), collapse = "|"), "", contrsts)
+      contrsts <- gsub(paste(paste0(base_levels, " "), collapse = "|"), "", contrsts)
+      contrsts <- gsub(paste(paste0(" ", base_levels), collapse = "|"), "", contrsts)
+
+      contrsts <-  gsub(":=", " =", contrsts)
+      contrsts <-  gsub(": ", " ", contrsts)
+    }
+
+
+    names(contrsts) <- gsub(paste(predictor, collapse = "|"), "", names(contrsts))
 
     if (non.zero) {# compare all against 0
       contrsts <- paste(pred_levels , "+ Intercept = 0")
@@ -155,11 +194,30 @@ contrasts <-
           gsub(gsub.pattern[i], gsub.replacement[i], names(contrsts))
     }
 
-   # evaluate hypothesis
-    hyps <- brms::hypothesis(fit, contrsts)
+
+    # evaluate hypothesis
+    # hyps <- brms::hypothesis(fit, contrsts[c(1, 2, 4)])$hypothesis
+    hyps <- lapply(seq_len(length(contrsts)), function(x) {
+
+      hyp <- try(brms::hypothesis(fit, contrsts[x]), silent = TRUE)
+
+      if (is(hyp, "try-error")){
+        hyp_tab <- data.frame(Hypothesis = contrsts[x], Estimate = NA, Est.Error = NA, CI.Lower = NA, CI.Upper = NA, Evid.Ratio = NA, Post.Prob = NA, Star = NA)
+        draws <- NULL
+        } else {
+          hyp_tab <- hyp$hypothesis
+          draws <- hyp$samples
+          colnames(draws) <- names(contrsts)[x]
+          }
+
+      return(list(hyp_tab = hyp_tab, draws = draws))
+      })
+
+    hyp_table <- do.call(rbind, lapply(hyps, "[[", 1))
+    draws <- do.call(cbind, lapply(hyps, "[[", 2))
 
     hyp_table <-
-      hyps$hypothesis[, c("Hypothesis",
+      hyp_table[, c("Hypothesis",
                           "Estimate",
                           "Est.Error",
                           "CI.Lower",
@@ -192,9 +250,9 @@ contrasts <-
 
     if (plot){
     # subsample posteriors
-    xdrws <- brms::as_draws(hyps$samples)
+    xdrws <- brms::as_draws(draws)
 
-    names(xdrws)[1:length(contrsts)] <- names(contrsts)
+    # names(xdrws)[1:length(contrsts)] <- names(contrsts)
 
     # only apply thinning if length of posterior < n.posterior
     xdrws <-
