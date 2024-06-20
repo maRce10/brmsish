@@ -2,6 +2,7 @@
 % Please edit documentation in R/brmsish-package.R
 \docType{package}
 \name{brmsish}
+\alias{brmsish-package}
 \alias{brmsish}
 \title{brmsish: miscellaneous functions to customize brms bayesian regression models}
 \description{
@@ -15,6 +16,14 @@ The main features of the package are:
   }
 
 License: GPL (>= 2)
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/maRce10/brmsish}
+  \item Report bugs at \url{https://github.com/maRce10/brmsish/issues}
+}
+
 }
 \author{
 Marcelo Araya-Salas

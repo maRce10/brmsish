@@ -1,18 +1,12 @@
 #' @title Print a summary of brmsfit results
 #'
 #' @description \code{extended_summary} prints a summary of brmsfit results.
-#' @usage extended_summary(fit = NULL, gsub.pattern = NULL,
-#' gsub.replacement = NULL,xlab = "Effect size", n.posterior = 2000,
-#' fit.name = NULL, read.file = NULL, plot.area.prop = 1,
-#' remove.intercepts = FALSE, fill = "#6DCD59FF",
-#' trace.palette = viridis::viridis, effects = NULL, save = FALSE,
-#' dest.path = ".", overwrite = FALSE, robust = FALSE,
-#' width = 8, height = "dynamic", highlight = FALSE,
-#' print.name = TRUE)
 #' @param fit A brmsfit object.
+#' @param draws A draws object.
 #' @param gsub.pattern A vector with character strings to be replaced
 #' @param gsub.replacement A vector with character strings to use for replacement.
 #' @param xlab A character string with the horizontal axis label. Default is "Effect size".
+#' @param ylab A character string with the vertical axis label. Default is "Parameter".
 #' @param n.posterior Number of posterior samples to use for plotting. Default is 2000.
 #' @param fit.name Character string to be added as title. If not supplied and 'read.file' is supplied the name is obtained from the file.
 #' @param read.file Character string with the name of a RDS file to be read, if supplied 'fit' is ignored.
@@ -30,6 +24,9 @@
 #' @param height Height of posterior distribution + trace plots as in \code{\link[ggplot2]{ggsave}}). Default is 'dynamic' which means that the height will increase as more panels (predictors) are added.
 #' @param highlight Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.
 #' @param print.name Logical to control if the name of the model fit is printed (when \code{plot = TRUE}).
+#' @param trace Logical to control if chain trace plots are generated. Default is \code{TRUE}.
+#' @param return Logical to control if tables and plots are returned as a list instead of printed. Default is \code{FALSE} (printing tables and plots).
+#' @param spread.type Character string with the name of the method to quantify the spread of posterior distributions. Two options are available: "HPDI" (highest posterior density interval) and "MAD" (mean absolute deviation, default).
 #' @return If \code{plot = TRUE} the function returns a model fit table, a coefficient table and a posterior distribution halfeye graph. If \code{save = TRUE} this objects are saved as a RDS file along with jpeg file.
 #' @export
 #' @name extended_summary
@@ -57,9 +54,11 @@
 
 extended_summary <-
   function(fit = NULL,
+           draws = NULL,
            gsub.pattern = NULL,
            gsub.replacement = NULL,
            xlab = "Effect size",
+           ylab = "Parameter",
            n.posterior = 2000,
            fit.name = NULL,
            read.file = NULL,
@@ -75,10 +74,13 @@ extended_summary <-
            width = 8,
            height = "dynamic",
            highlight = FALSE,
-           print.name = TRUE
+           print.name = TRUE,
+           trace = TRUE,
+           return = FALSE,
+           spread.type = "MAD"
            ) {
 
-     # object for avoiding errors with ggplot functions when checking package
+     # create objects just to avoid errors with ggplot functions when checking package
       `l-95% CI` <-
       `u-95% CI` <-
       significance <-
@@ -86,10 +88,10 @@ extended_summary <-
       variable <-
       CI_high <-
       CI_low <-
-      Hypothesis <- Parameter <- chain <- iteration <- NULL
+      Hypothesis <- Parameter <- chain <- iteration <- pa_comb_mod <- NULL
 
-    if (is.null(fit) & is.null(read.file))
-      stop("either 'fit' or 'read.file' must be supplied")
+    if (is.null(fit) & is.null(read.file) & is.null(draws))
+      stop("either 'fit', 'draws' or 'read.file' must be supplied")
 
     if (!is.null(fit) & is.null(fit.name))
       fit.name <- deparse(substitute(fit)) else
@@ -101,7 +103,13 @@ extended_summary <-
 
     if (is.null(fit) & !is.null(read.file))
       fit <- readRDS(read.file)
-    variables <- posterior::variables(fit)
+
+    if (!is.null(fit))
+      variables <- posterior::variables(fit)
+    # if (!is.null(draws))
+    #   variables <- grep("b_", names(draws), fixed = TRUE, value = TRUE)
+
+
     incl_classes <- c(
       "b", "bs", "bcs", "bsp", "bmo", "bme", "bmi", "bm",
       brms:::valid_dpars(fit), "delta", "lncor", "rescor", "ar", "ma", "sderr",
@@ -121,14 +129,35 @@ extended_summary <-
     warmup <- fit$fit@sim$warmup
     mod_formula <- as.character(fit$formula[1])
     diverg_transitions <- sum(brms::nuts_params(fit, pars = "divergent__")$Value)
+    percent_transitions <- diverg_transitions / nrow(brms::nuts_params(fit, pars = "divergent__"))
+    diverg_transitions <- paste0(diverg_transitions, " (", percent_transitions, "%)")
     priors <- paste(apply(brms::prior_summary(fit, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
     seed <- fit$fit@stan_args[[1]]$seed
     thinning <- fit$fit@stan_args[[1]]$thin
 
+
     # replace fit with draws (to avoid having several huge objects)
     fit <- posterior::as_draws_array(fit, variable = betas)
 
-    coef_table <- draw_summary(fit, variables = betas, probs = c(0.025, 0.975), robust = robust)
+    coef_table <- draw_summary(draws = fit, variables = betas, probs = c(0.025, 0.975), robust = robust, spread.type = spread.type)
+
+    min_bulk_ESS <- min(coef_table$Bulk_ESS)
+    min_tail_ESS <- min(coef_table$Tail_ESS)
+    rhats_1.05 <- sum(coef_table$Rhat > 1.05)
+
+    if (!is.null(draws)){
+
+      tidy_coef_table <-
+        tidybayes::summarise_draws(pa_comb_mod,
+                                   median,
+                                   ~ quantile(.x, probs = c(0.025, 0.975)),
+                                   default_convergence_measures())
+
+      min_bulk_ESS <- min(tidy_coef_table$ess_bulk)
+      min_tail_ESS <- min(tidy_coef_table$ess_tail)
+      rhats_1.05 <- sum(tidy_coef_table$rhat > 1.05)
+
+      }
 
     fit_table <-
       data.frame(
@@ -139,9 +168,9 @@ extended_summary <-
         thinning = thinning,
         warmup = warmup,
         diverg_transitions = diverg_transitions,
-        `rhats > 1.05` = sum(coef_table$Rhat > 1.05),
-        min_bulk_ESS = min(coef_table$Bulk_ESS),
-        min_tail_ESS = min(coef_table$Tail_ESS),
+        `rhats > 1.05` = rhats_1.05,
+        min_bulk_ESS = min_bulk_ESS,
+        min_tail_ESS = min_tail_ESS,
         seed = seed
       )
 
@@ -215,11 +244,6 @@ posteriors_by_chain$variable <-
              levels = sort(unique(posteriors_by_chain$variable), decreasing = TRUE))
 
     # define color for posterior distribution
-    # fill_values <- rep(grDevices::adjustcolor(fill, alpha.f = 0.5), nrow(coef_table2))
-    #
-    # if (highlight)
-    # fill_values <- ifelse(coef_table2$significance == "no-sig", grDevices::adjustcolor(fill, alpha.f = 0.25), fill_values)
-
     fill_values <-
       if (all(coef_table2$significance == "non-sig"))
         grDevices::adjustcolor(fill, alpha.f = 0.25) else
@@ -293,12 +317,16 @@ posteriors_by_chain$variable <-
         strip.background = ggplot2::element_blank(),
         strip.text = ggplot2::element_blank()
       ) +
-      ggplot2::labs(x = "Effect size", y = "Parameter")
+      ggplot2::labs(x = xlab, y = ylab) +
+      ggplot2::theme(
+        panel.spacing.y = ggplot2::unit(0, "null")  # no vertical space between panels
+      )
 
 
 if (plot.area.prop != 1)
   gg_distributions <- gg_distributions + ggplot2::xlim(range(c(posteriors_by_chain$value, 0)) * plot.area.prop)
 
+    if (trace){
     gg_traces <-
       ggplot2::ggplot(data = posteriors_by_chain, ggplot2::aes(x = iteration, y = value, color = chain)) +
       ggplot2::geom_line() +
@@ -324,6 +352,9 @@ if (plot.area.prop != 1)
                          ncol = 2,
                          rel_widths = c(1.8, 1))
 
+    } else
+      gg <- gg_distributions
+
     if (save){
 
       dir.create(file.path(dest.path, fit.name))
@@ -336,7 +367,16 @@ if (plot.area.prop != 1)
       cowplot::ggsave2(filename = file.path(dest.path, fit.name, "plot.jpeg"), plot = gg, width = width, height = height)
 
       saveRDS(object = list(fit_table = fit_table, coef_table = coef_table, graph = gg), file.path(dest.path, fit.name, "fit_table.RDS"))
-      } else {
+      }
+    if (return){
+      output_list <- list(
+        fit_table_html = html_format_fit_table(fit_table),
+        coef_table = coef_table,
+        coef_table_html = html_format_coef_table(coef_table, fill = fill,  highlight = highlight),
+        plot = gg
+        )
+      return(output_list)
+    } else {
 
       if (print.name)
         cat('\n\n## ', fit.name, '\n\n')

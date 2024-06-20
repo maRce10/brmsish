@@ -87,7 +87,7 @@ html_format_fit_table <- function(x){
 
   x$diverg_transitions <-
     ifelse(
-      x$diverg_transitions > 0,
+      as.numeric(sapply(strsplit(x$diverg_transitions, " "), "[[", 1)) > 0,
       kableExtra::cell_spec(
         x$diverg_transitions,
         "html",
@@ -191,15 +191,12 @@ html_format_coef_table <- function(x, fill, highlight){
     )
 }
 
-## helper modified from brms to get fit summary from draws object
-draw_summary <- function(draws, variables, probs, robust) {
 
-  .quantile <- function(x, ...) {
-    qs <- posterior::quantile2(x, probs = probs, ...)
-    prob <- probs[2] - probs[1]
-    names(qs) <- paste0(c("l-", "u-"), prob * 100, "% CI")
-    return(qs)
-  }
+
+## helper modified from brms to get fit summary from draws object
+draw_summary <- function(draws, variables, probs, robust, spread.type = c("MAD", "HPDI")) {
+
+
   draws <- posterior::subset_draws(draws, variable = variables)
   measures <- list()
   if (robust) {
@@ -216,7 +213,22 @@ draw_summary <- function(draws, variables, probs, robust) {
     # measures$Est.Error <- sd
   }
 
-  measures$quantiles <- .quantile
+
+  .quantile <- function(x, st = spread.type, prbs = probs, ...) {
+    if (st == "MAD")
+      qs <- posterior::quantile2(x, probs = prbs, ...)
+
+    prob <- prbs[2] - prbs[1]
+
+    if (st == "HPDI")
+      qs <- as.vector(coda::HPDinterval(coda::as.mcmc(as.vector(x)), probs = prob))
+
+    names(qs) <- paste0(c("l-", "u-"), prob * 100, "% CI")
+    return(qs)
+  }
+  .quantile2 <- function(x, st = spread.type, prbs = probs) .quantile(x, st = st, prbs =  prbs)
+
+  measures$quantiles <- .quantile2
   measures$Rhat <- posterior::rhat
   measures$Bulk_ESS <- posterior::ess_bulk
   measures$Tail_ESS <- posterior::ess_tail

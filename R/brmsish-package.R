@@ -17,6 +17,8 @@
 #' @import ggdist
 #' @import posterior
 #' @import brms
+#' @importFrom tidybayes summarise_draws
+#' @importFrom coda HPDinterval as.mcmc
 #' @importFrom methods is
 #' @importFrom viridis viridis
 #' @importFrom stats as.formula median

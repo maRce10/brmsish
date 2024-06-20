@@ -1,19 +1,19 @@
 #' @title Check brmsfit objects save as RDS files
 #'
-#' @description \code{check_rds_fits} checks brmsfit objects save as RDS files.
-#' @usage check_rds_fits(path = ".", fits = list.files(path = path, pattern = ".RDS$",
-#' ignore.case = TRUE, full.names = TRUE), cores = 1, pb = TRUE, robust = TRUE,
-#' html = FALSE, verbose = TRUE)
+#' @description \code{increase_iterations} checks brmsfit objects save as RDS files.
 #' @param path Directory in which to look for .rds files.
-#' @param fits Name of the .rds files to be read. Optional. If supplied 'path' is igored. This behavior allows user to supply file names including directories.
+#' @param fits Name of the .rds files to be read. Optional.
+#' @param check.rhat NOT YET IMPLEMENTED.
+#' @param increase NOT YET IMPLEMENTED.
+#' @param chains NOT YET IMPLEMENTED.
 #' @param cores Number of cores to use for parallelization. Default is 1 (no parallelization).
 #' @param pb Logical to control if a progress bar is used. Default is TRUE.
-#' @param robust Logical to control the type of central tendency measure as in \code{\link[brms]{summary.brmsfit}}).
-#' @param html Logical to control whether results are returned in html format. Useful for creating Rmd or quarto html reports. Is FALSE (default) the table is return as a data frame object.
-#' @param verbose Logical to control if messages are printed into the console.
+#' @param robust Logical to control the type of central tendency measure as in \code{\link[brms]{summary.brmsfit}}). NOT YET IMPLEMENTED.
+#' @param html Logical to control whether results are returned in html format. Useful for creating Rmd or quarto html reports. Is FALSE (default) the table is return as a data frame object. NOT YET IMPLEMENTED.
+#' @param verbose Logical to control if messages are printed into the console. NOT YET IMPLEMENTED.
 #' @return Returns a data frame with a summary of fitted models. Can be used to make sure all models were run with the same parameters (e.g. before combining models). If \code{html = FALSE} the function will return a data frame, otherwise it will print the estimates in a table in html format. The summary includes: prior, formula, number of iterations, number of chain, thinning, warmup, number of parameters, number of divergent transitions, number of rhats higher than 1.05, tail and bulk effective sample sizes and seed.
 #' @export
-#' @name check_rds_fits
+#' @name increase_iterations
 #' @details The function reads all fits saved as rds files in the supplied directory and generates a table listing the parameters used to fit models.
 #' @examples
 #' {
@@ -27,7 +27,7 @@
 #' iter = 500, file = file.path(tempdir(), "rdss", "md2"))
 #'
 #' # check fits
-#' check_rds_fits(path = file.path(tempdir(), "rdss"))
+#' increase_iterations(path = file.path(tempdir(), "rdss"))
 #' }
 #' @seealso \code{\link{extended_summary}}, \code{\link{combine_rds_fits}}
 #' @author Marcelo Araya-Salas \email{marcelo.araya@@ucr.ac.cr})
@@ -38,7 +38,16 @@
 #' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 #' }
 
-check_rds_fits <- function(path = ".", fits = list.files(path = path, pattern = ".RDS$", ignore.case = TRUE, full.names = TRUE), cores = 1, pb = TRUE, robust = TRUE, html = FALSE, verbose = TRUE){
+increase_iterations <- function(path = ".", fits = list.files(path = path, pattern = ".RDS$", ignore.case = TRUE, full.names = TRUE), cores = 1, pb = TRUE, check.rhat = FALSE, increase = "2x", chains = 4, robust = TRUE, html = FALSE, verbose = TRUE){
+
+  # set empty variables to avoid checking errors
+  robust <- diverg_transitions <- verbose <- html <- NULL
+
+  if (pb){
+    cat("Checking fits (step 1 out of 2):")
+  }
+  rds_check_df <- check_rds_fits(path = path, cores = cores, fits = fits, pb = pb, html = FALSE)
+
 
   # run loop over fits
   fit_table_list <- pblapply_brmsish_int(X = fits, cl = cores, pbar = pb ,function(x){
@@ -56,9 +65,9 @@ check_rds_fits <- function(path = ".", fits = list.files(path = path, pattern = 
       chains <- posterior::nchains(fit)
       warmup <- fit$fit@sim$warmup
       mod_formula <- as.character(fit$formula[1])
-      diverg_transitions <- sum(brms::nuts_params(fit, pars = "divergent__")$Value)
-      percent_transitions <- diverg_transitions / nrow(brms::nuts_params(fit, pars = "divergent__"))
-      diverg_transitions <- paste0(diverg_transitions, " (", percent_transitions, "%)")
+      # diverg_transitions <- sum(brms::nuts_params(fit, pars = "divergent__")$Value)
+      # percent_transitions <- diverg_transitions / nrow(brms::nuts_params(fit, pars = "divergent__"))
+      # diverg_transitions <- paste0(diverg_transitions, " (", percent_transitions, "%)")
       priors <- paste(apply(brms::prior_summary(fit, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
       seed <- fit$fit@stan_args[[1]]$seed
       thinning <- fit$fit@stan_args[[1]]$thin
@@ -70,9 +79,6 @@ check_rds_fits <- function(path = ".", fits = list.files(path = path, pattern = 
 
       # get summary
       coef_table <- draw_summary(fit, variables = vars, probs = c(0.025, 0.975), robust = robust)
-
-      # remove fit to avoid RAM usage issues
-      rm(fit)
 
       # put parameters on a table
       fit_table <-
@@ -92,6 +98,7 @@ check_rds_fits <- function(path = ".", fits = list.files(path = path, pattern = 
           seed = seed,
           check.names = FALSE
         )
+
     } else
       fit_table <- NA
 

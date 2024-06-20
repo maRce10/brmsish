@@ -4,23 +4,46 @@
 \alias{extended_summary}
 \title{Print a summary of brmsfit results}
 \usage{
-extended_summary(fit = NULL, gsub.pattern = NULL,
-gsub.replacement = NULL,xlab = "Effect size", n.posterior = 2000,
-fit.name = NULL, read.file = NULL, plot.area.prop = 1,
-remove.intercepts = FALSE, fill = "#6DCD59FF",
-trace.palette = viridis::viridis, effects = NULL, save = FALSE,
-dest.path = ".", overwrite = FALSE, robust = FALSE,
-width = 8, height = "dynamic", highlight = FALSE,
-print.name = TRUE)
+extended_summary(
+  fit = NULL,
+  draws = NULL,
+  gsub.pattern = NULL,
+  gsub.replacement = NULL,
+  xlab = "Effect size",
+  ylab = "Parameter",
+  n.posterior = 2000,
+  fit.name = NULL,
+  read.file = NULL,
+  plot.area.prop = 1,
+  remove.intercepts = FALSE,
+  fill = "#6DCD59FF",
+  trace.palette = viridis::viridis,
+  effects = NULL,
+  save = FALSE,
+  dest.path = ".",
+  overwrite = FALSE,
+  robust = FALSE,
+  width = 8,
+  height = "dynamic",
+  highlight = FALSE,
+  print.name = TRUE,
+  trace = TRUE,
+  return = FALSE,
+  spread.type = "MAD"
+)
 }
 \arguments{
 \item{fit}{A brmsfit object.}
+
+\item{draws}{A draws object.}
 
 \item{gsub.pattern}{A vector with character strings to be replaced}
 
 \item{gsub.replacement}{A vector with character strings to use for replacement.}
 
 \item{xlab}{A character string with the horizontal axis label. Default is "Effect size".}
+
+\item{ylab}{A character string with the vertical axis label. Default is "Parameter".}
 
 \item{n.posterior}{Number of posterior samples to use for plotting. Default is 2000.}
 
@@ -53,6 +76,12 @@ print.name = TRUE)
 \item{highlight}{Logical to control if posterior estimates for which the 95\% credible intervals do not overlap with zero are highlighted. Default is FALSE.}
 
 \item{print.name}{Logical to control if the name of the model fit is printed (when \code{plot = TRUE}).}
+
+\item{trace}{Logical to control if chain trace plots are generated. Default is \code{TRUE}.}
+
+\item{return}{Logical to control if tables and plots are returned as a list instead of printed. Default is \code{FALSE} (printing tables and plots).}
+
+\item{spread.type}{Character string with the name of the method to quantify the spread of posterior distributions. Two options are available: "HPDI" (highest posterior density interval) and "MAD" (mean absolute deviation, default).}
 }
 \value{
 If \code{plot = TRUE} the function returns a model fit table, a coefficient table and a posterior distribution halfeye graph. If \code{save = TRUE} this objects are saved as a RDS file along with jpeg file.

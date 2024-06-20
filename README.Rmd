@@ -23,6 +23,7 @@ knitr::opts_chunk$set(
 
 ```
 
+THIS PACKAGE IS UNDER DEVELOPMENT AND MANY FUNCTIONS ARE NOT THE MOST ELEGAN APPROACH FOR WHAT THEY ARE INTENDED TO DO. I am still learning about bayesian model structure in R. 
 
 This package offers functions to visualize and/or modify [brms](https://paul-buerkner.github.io/brms/index.html) models. It's a collection of functions that I have been accumulating as I have been trying to customize the output of [brms](https://paul-buerkner.github.io/brms/index.html) models. So far the package has functions for:
 
