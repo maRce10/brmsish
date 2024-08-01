@@ -62,6 +62,7 @@ combine_rds_fits <-
     if (file.exists(file.name) & !overwrite)
       message(paste0("combined model fit '", basename(file.name), "' already existed (overwrite = FALSE)"))
 
+    output <- NULL
     if (!file.exists(file.name) | overwrite) {
       mods_rds <-
         list.files(
@@ -75,7 +76,7 @@ combine_rds_fits <-
 
     combine_success <- try(mods_comb <- combine_models(mlist = mods_list, check_data = check.data), silent = TRUE)
 
-    output <- NULL
+
     if (!is(combine_success, "try-error")){
 
       if (verbose)
