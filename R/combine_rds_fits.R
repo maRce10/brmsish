@@ -92,7 +92,7 @@ combine_rds_fits <-
         }
 
       if (summary)
-        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, fit.name = fit.name, ...)
+        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, fit.name = fit.name, print.name =  FALSE, ...)
 
     } else
     if (verbose)
