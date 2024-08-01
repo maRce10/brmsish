@@ -75,6 +75,7 @@ combine_rds_fits <-
 
     combine_success <- try(mods_comb <- combine_models(mlist = mods_list, check_data = check.data), silent = TRUE)
 
+    output <- NULL
     if (!is(combine_success, "try-error")){
 
       if (verbose)
@@ -83,8 +84,6 @@ combine_rds_fits <-
 
               if (save) {
         saveRDS(mods_comb, file.name)
-
-    output <- NULL
 
       } else {
         output <- mods_comb
