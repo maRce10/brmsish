@@ -80,16 +80,24 @@ combine_rds_fits <-
       if (verbose)
         message(paste0("model fits at '", name, "' successfully combined (", length(mods_rds), " RDS files)"))
 
-      if (summary)
-        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, ...)
 
               if (save) {
         saveRDS(mods_comb, file.name)
-        return(NULL)
-      } else
-        return(mods_comb)
+
+    output <- NULL
+
+      } else {
+        output <- mods_comb
+        }
+
+      if (summary)
+        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, ...)
+
     } else
     if (verbose)
       message(paste("model fits at folder", name, "could not be combined"))
-  }
+    }
+
+  if (!is.null(output))
+    return(output)
 }
