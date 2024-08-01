@@ -53,6 +53,8 @@ combine_rds_fits <-
            ...
            ) {
 
+
+    print("NOW IS UPDATED")
     if (is.null(name))
       name <- basename(path)
 
