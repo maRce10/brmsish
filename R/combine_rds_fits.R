@@ -50,11 +50,10 @@ combine_rds_fits <-
            check.data = TRUE,
            verbose = TRUE,
            summary = FALSE,
+           fit.name = NULL,
            ...
            ) {
 
-
-    print("NOW IS UPDATED")
     if (is.null(name))
       name <- basename(path)
 
@@ -93,7 +92,7 @@ combine_rds_fits <-
         }
 
       if (summary)
-        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, ...)
+        extended_summary(fit = mods_comb, dest.path = dest.path, save = TRUE, overwrite = overwrite, fit.name = fit.name, ...)
 
     } else
     if (verbose)
