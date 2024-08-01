@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -31,20 +31,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/maRce10/brmsish/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Estimate hypothesis testing for all pairwise comparisons of categorical predictor levels</h1>
-    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/HEAD/R/contrasts.R" class="external-link"><code>R/contrasts.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/master/R/contrasts.R" class="external-link"><code>R/contrasts.R</code></a></small>
     <div class="hidden name"><code>contrasts.Rd</code></div>
     </div>
 
@@ -62,71 +62,71 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>fit</dt>
+
+
+<dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>A brmsfit object.</p></dd>
 
 
-<dt>predictor</dt>
+<dt id="arg-predictor">predictor<a class="anchor" aria-label="anchor" href="#arg-predictor"></a></dt>
 <dd><p>The name of the categorical predictor in the model fit for which contrasts will be computed. Note that the predictor must have at least 3 levels.</p></dd>
 
 
-<dt>level.sep</dt>
+<dt id="arg-level-sep">level.sep<a class="anchor" aria-label="anchor" href="#arg-level-sep"></a></dt>
 <dd><p>A character string to separate the levels in the output.</p></dd>
 
 
-<dt>xlab</dt>
+<dt id="arg-xlab">xlab<a class="anchor" aria-label="anchor" href="#arg-xlab"></a></dt>
 <dd><p>A character string with the horizontal axis label. Default is "Effect size".</p></dd>
 
 
-<dt>gsub.pattern</dt>
+<dt id="arg-gsub-pattern">gsub.pattern<a class="anchor" aria-label="anchor" href="#arg-gsub-pattern"></a></dt>
 <dd><p>A vector with character strings to be replaced</p></dd>
 
 
-<dt>gsub.replacement</dt>
+<dt id="arg-gsub-replacement">gsub.replacement<a class="anchor" aria-label="anchor" href="#arg-gsub-replacement"></a></dt>
 <dd><p>A vector with character strings to use for replacement.</p></dd>
 
 
-<dt>n.posterior</dt>
+<dt id="arg-n-posterior">n.posterior<a class="anchor" aria-label="anchor" href="#arg-n-posterior"></a></dt>
 <dd><p>Number of posterior samples to use for plotting. Default is 2000.</p></dd>
 
 
-<dt>fill</dt>
+<dt id="arg-fill">fill<a class="anchor" aria-label="anchor" href="#arg-fill"></a></dt>
 <dd><p>Color for posterior distribution fill. Default is "#6DCD59FF".</p></dd>
 
 
-<dt>sort.levels</dt>
+<dt id="arg-sort-levels">sort.levels<a class="anchor" aria-label="anchor" href="#arg-sort-levels"></a></dt>
 <dd><p>Character vector with the order to be used for levels in the predictor.</p></dd>
 
 
-<dt>html.table</dt>
+<dt id="arg-html-table">html.table<a class="anchor" aria-label="anchor" href="#arg-html-table"></a></dt>
 <dd><p>Logical to control whether estimate tables are plotted in html format. Useful for creating dynamic reports (i.e. Rmd or quarto html reports). Is FALSE (default) the table is return as a data frame object. You might have to add 'results = 'as.is' to chunk options in dynamic reports.</p></dd>
 
 
-<dt>read.file</dt>
+<dt id="arg-read-file">read.file<a class="anchor" aria-label="anchor" href="#arg-read-file"></a></dt>
 <dd><p>Character string with the name of the .rds file containing the model fit.</p></dd>
 
 
-<dt>plot</dt>
+<dt id="arg-plot">plot<a class="anchor" aria-label="anchor" href="#arg-plot"></a></dt>
 <dd><p>Logical to control if posterior distributions of estimates are plotted. Default is FALSE.</p></dd>
 
 
-<dt>plot.area.prop</dt>
+<dt id="arg-plot-area-prop">plot.area.prop<a class="anchor" aria-label="anchor" href="#arg-plot-area-prop"></a></dt>
 <dd><p>Positive number to control de proportion of the plotting area of posterior distributions that will be included. Default is 1 (the default area included by <code><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></code>). Useful for adding or removing empty space around distributions.</p></dd>
 
 
-<dt>highlight</dt>
+<dt id="arg-highlight">highlight<a class="anchor" aria-label="anchor" href="#arg-highlight"></a></dt>
 <dd><p>Logical to control if posterior estimates for which the 95% credible intervals do not overlap with zero are highlighted. Default is FALSE.</p></dd>
 
 
-<dt>non.zero</dt>
+<dt id="arg-non-zero">non.zero<a class="anchor" aria-label="anchor" href="#arg-non-zero"></a></dt>
 <dd><p>Logical to determine if the predictor levels are compared against zero instead. Default is FALSE.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>If <code>plot = TRUE</code> the function returns a ggplot object with the posterior distributions of the comparisons between predictor levels. If <code>html = FALSE</code> the function will return a data frame with estimates for each comparison, otherwise it will print the estimates in a table in html format.</p>
+    <p>If <code>plot = TRUE</code> the function returns a ggplot object with the posterior distributions of the comparisons between predictor levels. If <code>html = FALSE</code> the function will return a data frame with estimates for each comparison, otherwise it will print the estimates in a table in html format.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -173,15 +173,15 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

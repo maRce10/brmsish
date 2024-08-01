@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -31,20 +31,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/maRce10/brmsish/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Check brmsfit objects save as RDS files</h1>
-    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/HEAD/R/check_rds_fits.R" class="external-link"><code>R/check_rds_fits.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/master/R/check_rds_fits.R" class="external-link"><code>R/check_rds_fits.R</code></a></small>
     <div class="hidden name"><code>check_rds_fits.Rd</code></div>
     </div>
 
@@ -60,39 +60,39 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>path</dt>
+
+
+<dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
 <dd><p>Directory in which to look for .rds files.</p></dd>
 
 
-<dt>fits</dt>
+<dt id="arg-fits">fits<a class="anchor" aria-label="anchor" href="#arg-fits"></a></dt>
 <dd><p>Name of the .rds files to be read. Optional. If supplied 'path' is igored. This behavior allows user to supply file names including directories.</p></dd>
 
 
-<dt>cores</dt>
+<dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores to use for parallelization. Default is 1 (no parallelization).</p></dd>
 
 
-<dt>pb</dt>
+<dt id="arg-pb">pb<a class="anchor" aria-label="anchor" href="#arg-pb"></a></dt>
 <dd><p>Logical to control if a progress bar is used. Default is TRUE.</p></dd>
 
 
-<dt>robust</dt>
+<dt id="arg-robust">robust<a class="anchor" aria-label="anchor" href="#arg-robust"></a></dt>
 <dd><p>Logical to control the type of central tendency measure as in <code><a href="https://paul-buerkner.github.io/brms/reference/summary.brmsfit.html" class="external-link">summary.brmsfit</a></code>).</p></dd>
 
 
-<dt>html</dt>
+<dt id="arg-html">html<a class="anchor" aria-label="anchor" href="#arg-html"></a></dt>
 <dd><p>Logical to control whether results are returned in html format. Useful for creating Rmd or quarto html reports. Is FALSE (default) the table is return as a data frame object.</p></dd>
 
 
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical to control if messages are printed into the console.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>Returns a data frame with a summary of fitted models. Can be used to make sure all models were run with the same parameters (e.g. before combining models). If <code>html = FALSE</code> the function will return a data frame, otherwise it will print the estimates in a table in html format. The summary includes: prior, formula, number of iterations, number of chain, thinning, warmup, number of parameters, number of divergent transitions, number of rhats higher than 1.05, tail and bulk effective sample sizes and seed.</p>
+    <p>Returns a data frame with a summary of fitted models. Can be used to make sure all models were run with the same parameters (e.g. before combining models). If <code>html = FALSE</code> the function will return a data frame, otherwise it will print the estimates in a table in html format. The summary includes: prior, formula, number of iterations, number of chain, thinning, warmup, number of parameters, number of divergent transitions, number of rhats higher than 1.05, tail and bulk effective sample sizes and seed.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -142,15 +142,15 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

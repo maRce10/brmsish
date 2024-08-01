@@ -3,7 +3,7 @@
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 <![endif]--></head><body data-spy="scroll" data-target="#toc">
-    
+
 
     <div class="container template-reference-topic">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -31,20 +31,20 @@
       </ul><ul class="nav navbar-nav navbar-right"><li>
   <a href="https://github.com/maRce10/brmsish/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
-     
+
   </a>
 </li>
       </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
-      
+
 
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Check brmsfit objects save as RDS files</h1>
-    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/HEAD/R/increase_iterations.R" class="external-link"><code>R/increase_iterations.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/maRce10/brmsish/blob/master/R/increase_iterations.R" class="external-link"><code>R/increase_iterations.R</code></a></small>
     <div class="hidden name"><code>increase_iterations.Rd</code></div>
     </div>
 
@@ -70,51 +70,51 @@
 
     <div id="arguments">
     <h2>Arguments</h2>
-    <dl><dt>path</dt>
+
+
+<dl><dt id="arg-path">path<a class="anchor" aria-label="anchor" href="#arg-path"></a></dt>
 <dd><p>Directory in which to look for .rds files.</p></dd>
 
 
-<dt>fits</dt>
+<dt id="arg-fits">fits<a class="anchor" aria-label="anchor" href="#arg-fits"></a></dt>
 <dd><p>Name of the .rds files to be read. Optional.</p></dd>
 
 
-<dt>cores</dt>
+<dt id="arg-cores">cores<a class="anchor" aria-label="anchor" href="#arg-cores"></a></dt>
 <dd><p>Number of cores to use for parallelization. Default is 1 (no parallelization).</p></dd>
 
 
-<dt>pb</dt>
+<dt id="arg-pb">pb<a class="anchor" aria-label="anchor" href="#arg-pb"></a></dt>
 <dd><p>Logical to control if a progress bar is used. Default is TRUE.</p></dd>
 
 
-<dt>check.rhat</dt>
+<dt id="arg-check-rhat">check.rhat<a class="anchor" aria-label="anchor" href="#arg-check-rhat"></a></dt>
 <dd><p>NOT YET IMPLEMENTED.</p></dd>
 
 
-<dt>increase</dt>
+<dt id="arg-increase">increase<a class="anchor" aria-label="anchor" href="#arg-increase"></a></dt>
 <dd><p>NOT YET IMPLEMENTED.</p></dd>
 
 
-<dt>chains</dt>
+<dt id="arg-chains">chains<a class="anchor" aria-label="anchor" href="#arg-chains"></a></dt>
 <dd><p>NOT YET IMPLEMENTED.</p></dd>
 
 
-<dt>robust</dt>
+<dt id="arg-robust">robust<a class="anchor" aria-label="anchor" href="#arg-robust"></a></dt>
 <dd><p>Logical to control the type of central tendency measure as in <code><a href="https://paul-buerkner.github.io/brms/reference/summary.brmsfit.html" class="external-link">summary.brmsfit</a></code>). NOT YET IMPLEMENTED.</p></dd>
 
 
-<dt>html</dt>
+<dt id="arg-html">html<a class="anchor" aria-label="anchor" href="#arg-html"></a></dt>
 <dd><p>Logical to control whether results are returned in html format. Useful for creating Rmd or quarto html reports. Is FALSE (default) the table is return as a data frame object. NOT YET IMPLEMENTED.</p></dd>
 
 
-<dt>verbose</dt>
+<dt id="arg-verbose">verbose<a class="anchor" aria-label="anchor" href="#arg-verbose"></a></dt>
 <dd><p>Logical to control if messages are printed into the console. NOT YET IMPLEMENTED.</p></dd>
 
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    
-
-<p>Returns a data frame with a summary of fitted models. Can be used to make sure all models were run with the same parameters (e.g. before combining models). If <code>html = FALSE</code> the function will return a data frame, otherwise it will print the estimates in a table in html format. The summary includes: prior, formula, number of iterations, number of chain, thinning, warmup, number of parameters, number of divergent transitions, number of rhats higher than 1.05, tail and bulk effective sample sizes and seed.</p>
+    <p>Returns a data frame with a summary of fitted models. Can be used to make sure all models were run with the same parameters (e.g. before combining models). If <code>html = FALSE</code> the function will return a data frame, otherwise it will print the estimates in a table in html format. The summary includes: prior, formula, number of iterations, number of chain, thinning, warmup, number of parameters, number of divergent transitions, number of rhats higher than 1.05, tail and bulk effective sample sizes and seed.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -148,7 +148,7 @@
 <span class="r-in"><span><span class="co"># check fits</span></span></span>
 <span class="r-in"><span><span class="fu">increase_iterations</span><span class="op">(</span>path <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">"rdss"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'/tmp/RtmpKQ1i68/rdss' already exists</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'/tmp/RtmpMUUHSh/rdss' already exists</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Compiling Stan program...</span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in .fun(model_code = .x1):</span> Boost not found; call install.packages('BH')</span>
 </code></pre></div>
@@ -165,15 +165,15 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
 </div>
 
       </footer></div>
 
-  
 
 
-  
+
+
 
   </body></html>
 

@@ -1,45 +1,17 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/CONTRIBUTING.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/brmsish.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_rds_fits.html</loc>
-  </url>
-  <url>
-    <loc>/reference/combine_rds_fits.html</loc>
-  </url>
-  <url>
-    <loc>/reference/contrasts.html</loc>
-  </url>
-  <url>
-    <loc>/reference/extended_summary.html</loc>
-  </url>
-  <url>
-    <loc>/reference/increase_iterations.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/phylogenetic_uncertainty.html</loc>
-  </url>
-  <url>
-    <loc>/reference/read_summary.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/CONTRIBUTING.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/brmsish.html</loc></url>
+<url><loc>/reference/check_rds_fits.html</loc></url>
+<url><loc>/reference/combine_rds_fits.html</loc></url>
+<url><loc>/reference/contrasts.html</loc></url>
+<url><loc>/reference/extended_summary.html</loc></url>
+<url><loc>/reference/increase_iterations.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/phylogenetic_uncertainty.html</loc></url>
+<url><loc>/reference/read_summary.html</loc></url>
 </urlset>
+
