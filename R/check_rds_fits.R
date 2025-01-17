@@ -69,7 +69,7 @@ check_rds_fits <- function(path = ".", fits = list.files(path = path, pattern = 
       fit <- posterior::as_draws_array(fit, variable = vars)
 
       # get summary
-      coef_table <- draw_summary(fit, variables = vars, probs = c(0.025, 0.975), robust = robust)
+      coef_table <- draw_summary(draws = fit, variables = vars, probs = c(0.025, 0.975), robust = robust, spread.type = "MAD")
 
       # remove fit to avoid RAM usage issues
       rm(fit)

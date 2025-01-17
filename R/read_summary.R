@@ -30,7 +30,7 @@
 #' Paul-Christian Buerkner (2017). brms: An R Package for Bayesian Multilevel Models Using Stan. Journal of Statistical Software, 80(1), 1-28. doi:10.18637/jss.v080.i01
 #' }
 #'
-read_summary <- function(path = ".", fill = "#6DCD59FF", highlight = FALSE){
+read_summary <- function(path = ".", fill = "#6DCD59FF", highlight = FALSE, relative.path = FALSE){
 
   # Read fit output
   mod <- readRDS(file.path(path, "fit_table.RDS"))
@@ -53,7 +53,10 @@ read_summary <- function(path = ".", fill = "#6DCD59FF", highlight = FALSE){
   print(coef_table)
 
   # plot
+  if (!relative.path)
   path <- normalizePath(path)
+
+  # print code in html to plot graph
   cat("![](", file.path(path, "plot.jpeg"), ")", sep = "")
 }
 

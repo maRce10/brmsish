@@ -27,7 +27,7 @@
 #' @name contrasts
 #' @details Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function \code{\link[brms]{hypothesis}} is used internally. Alternatively, if argument \code{non.zero = TRUE} the function evaluates whether each level of the predictor is different from zero.
 #'
-#' Note that comparisons (i.e. contrasts) of categorical predictor levels when additional predictors are also included in the model are computed at the baseline (categorical predictors) or 0 (continuous predictors) value of the additional predictors. Mean-centering on additional continuous predictors can be used to ensure that the mean value of continuous predictors is used as baseline instead (Schielzeth 2010).
+#' Note that comparisons (i.e. contrasts) of categorical predictor levels when additional predictors are also included in the model are computed at the baseline (categorical predictors) or 0 (continuous predictors) value of the additional predictors. Mean-centering on additional continuous predictors can be used to ensure that the mean value of continuous predictors is used as baseline instead (Schielzeth 2010). Avoid using '+' in the predictor level names.
 #' @examples
 #' {
 #' # run model
@@ -132,9 +132,7 @@ contrasts <-
       if (length(predictor) == 1)
         sort.levels <- paste0(predictor, sort.levels)
       pred_levels <- pred_levels[match(sort.levels, pred_levels)]
-
       }
-
 
     # create data frame with level pairs
     if (!non.zero)
@@ -159,7 +157,6 @@ contrasts <-
     contrsts <- gsub(paste0(base_level, " - "), "", contrsts)
     contrsts <- gsub(paste0(" - ", base_level), "", contrsts)
 
-
     if (length(predictor) > 1) {
       contrsts <- gsub(paste(paste0(base_levels, ":"), collapse = "|"), "", contrsts)
       contrsts <- gsub(paste(paste0(":", base_levels), collapse = "|"), "", contrsts)
@@ -171,7 +168,6 @@ contrasts <-
       contrsts <-  gsub(":=", " =", contrsts)
       contrsts <-  gsub(": ", " ", contrsts)
     }
-
 
     names(contrsts) <- gsub(paste(predictor, collapse = "|"), "", names(contrsts))
 

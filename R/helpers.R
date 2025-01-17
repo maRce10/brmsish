@@ -453,3 +453,28 @@ draw_summary <- function(draws, variables, probs, robust, spread.type = c("MAD",
 # {
 #   "ordinal" %in% .family_info(family, "specials")
 # }
+
+
+
+## function that automatically rounds numbers to a specified number of non-zero decimals
+
+.round_non_zero <- function(x, n = 2) {
+  # Check if the number is zero
+  if (x == 0) {
+    return(0)
+  }
+
+  # Calculate the order of magnitude of the number
+  magnitude <- floor(log10(abs(x)))
+
+  # Calculate the factor to scale the number
+  scale_factor <- 10^(n - 1 - magnitude)
+
+  # Round the scaled number
+  rounded_scaled <- round(x * scale_factor)
+
+  # Scale back to the original magnitude
+  rounded <- rounded_scaled / scale_factor
+
+  return(rounded)
+}

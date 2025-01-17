@@ -8,7 +8,8 @@ draw_extended_summary <- function(draws,
                                   gsub.pattern = NULL,
                                   gsub.replacement = NULL,
                                   xlab = "Effect size",
-                                  ylab = "Parameter") {
+                                  ylab = "Parameter",
+                                  beta.prefix = "^b_") {
 
   # create objects just to avoid errors with ggplot functions when checking package
   position_dodge <- org.variable <- value <- significance <- `l-95% CI` <- `u-95% CI` <- theme <- unit <- NULL
@@ -20,14 +21,19 @@ draw_extended_summary <- function(draws,
   } else
     unique_levels <- ".A"
 
+  if(length(beta.prefix) > 1) {
+
+    beta.prefix <- paste(beta.prefix, collapse = "|")
+  }
+
   # run loop over each level (or just the single "level")
   results_list <- lapply(unique_levels, function(x) {
     if (identical(unique_levels, ".A")) {
       # keep only betas
-      draws <- draws[, grep("^b_", names(draws), value = TRUE)]
+      draws <- draws[, grep(beta.prefix, names(draws), value = TRUE)]
     } else {
       draws <-
-        draws[draws[, by, drop = TRUE] == x, grep("^b_", names(draws), value = TRUE)]
+        draws[draws[, by, drop = TRUE] == x, grep(beta.prefix, names(draws), value = TRUE)]
     }
 
     # remove intercept betas
@@ -58,7 +64,7 @@ draw_extended_summary <- function(draws,
 
     if (ncol(draws) > 1)
       sdraws <-
-      stack(draws[, grep("^b_", names(draws), value = TRUE)], ind = "levels")
+      stack(draws[, grep(beta.prefix, names(draws), value = TRUE)], ind = "levels")
     else
       sdraws <-
       data.frame(value = draws[, 1], variable = names(draws))

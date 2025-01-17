@@ -77,7 +77,8 @@ extended_summary <-
            print.name = TRUE,
            trace = TRUE,
            return = FALSE,
-           spread.type = "MAD"
+           spread.type = "MAD",
+           beta.prefix = "^b_"
            ) {
 
      # create objects just to avoid errors with ggplot functions when checking package
@@ -111,14 +112,20 @@ extended_summary <-
 
 
     incl_classes <- c(
-      "b", "bs", "bcs", "bsp", "bmo", "bme", "bmi", "bm",
+      "b", "bs", "bcs", "bsp", "bsp_mo", "bmo", "bme", "bmi", "bm",
       brms:::valid_dpars(fit), "delta", "lncor", "rescor", "ar", "ma", "sderr",
       "cosy", "cortime", "lagsar", "errorsar", "car", "sdcar", "rhocar",
       "sd", "cor", "df", "sds", "sdgp", "lscale", "simo"
     )
     incl_regex <- paste0("^", brms:::regex_or(incl_classes), "(_|$|\\[)")
     variables <- variables[grepl(incl_regex, variables)]
-    betas <- grep("^b_", variables, value = TRUE)
+
+    if(length(beta.prefix) > 1) {
+
+      beta.prefix <- paste(beta.prefix, collapse = "|")
+    }
+
+    betas <- grep(beta.prefix, variables, value = TRUE)
 
     # remove intercept betas
     if (remove.intercepts)
@@ -129,7 +136,7 @@ extended_summary <-
     warmup <- fit$fit@sim$warmup
     mod_formula <- as.character(fit$formula[1])
     diverg_transitions <- sum(brms::nuts_params(fit, pars = "divergent__")$Value)
-    percent_transitions <- diverg_transitions / nrow(brms::nuts_params(fit, pars = "divergent__"))
+    percent_transitions <- .round_non_zero(diverg_transitions / nrow(brms::nuts_params(fit, pars = "divergent__")))
     diverg_transitions <- paste0(diverg_transitions, " (", percent_transitions, "%)")
     priors <- paste(apply(brms::prior_summary(fit, all = FALSE)[, 2:1], 1, paste, collapse = "-"), collapse = "\n")
     seed <- fit$fit@stan_args[[1]]$seed
