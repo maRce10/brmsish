@@ -130,7 +130,7 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function <code><a href="https://paul-buerkner.github.io/brms/reference/hypothesis.brmsfit.html" class="external-link">hypothesis</a></code> is used internally. Alternatively, if argument <code>non.zero = TRUE</code> the function evaluates whether each level of the predictor is different from zero.</p>
+    <p>Estimates hypothesis testing for all pairwise comparisons of levels from a categorical predictor. The function <code><a href="https://paulbuerkner.com/brms/reference/hypothesis.brmsfit.html" class="external-link">hypothesis</a></code> is used internally. Alternatively, if argument <code>non.zero = TRUE</code> the function evaluates whether each level of the predictor is different from zero.</p>
 <p>Note that comparisons (i.e. contrasts) of categorical predictor levels when additional predictors are also included in the model are computed at the baseline (categorical predictors) or 0 (continuous predictors) value of the additional predictors. Mean-centering on additional continuous predictors can be used to ensure that the mean value of continuous predictors is used as baseline instead (Schielzeth 2010).</p>
     </div>
     <div id="references">
@@ -150,7 +150,7 @@
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="op">{</span></span></span>
 <span class="r-in"><span><span class="co"># run model</span></span></span>
-<span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paul-buerkner.github.io/brms/reference/brm.html" class="external-link">brm</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Species</span>, <span class="va">iris</span>, chains <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">mod</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://paulbuerkner.com/brms/reference/brm.html" class="external-link">brm</a></span><span class="op">(</span><span class="va">Petal.Length</span> <span class="op">~</span> <span class="va">Species</span>, <span class="va">iris</span>, chains <span class="op">=</span> <span class="fl">1</span>, iter <span class="op">=</span> <span class="fl">500</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># compute constrasts with plot</span></span></span>
 <span class="r-in"><span><span class="fu">contrasts</span><span class="op">(</span>fit <span class="op">=</span> <span class="va">mod</span>, predictor <span class="op">=</span> <span class="st">"Species"</span>, html.table <span class="op">=</span> <span class="cn">TRUE</span>, plot <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
@@ -173,7 +173,7 @@
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
       </footer></div>
